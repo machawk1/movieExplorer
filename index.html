@@ -82,7 +82,6 @@ function Visualization(){
 		this.movie = movieIn;
 	}
 
-
 this.width = 1200;
 this.height = 600;
 
@@ -93,33 +92,45 @@ var force = d3.layout.force()
     .size([this.width, this.height])
     .nodes([{}]) // initialize with a single node
     .linkDistance(30)
-    //.charge(-60)
     .on("tick", tick);
 this.draw = function(){
+	this.svg = d3.select("body").append("svg").attr("width", this.width)
+    	.attr("height", this.height).attr("id","viz");
 
-this.svg = d3.select("body").append("svg").attr("width", this.width)
-    .attr("height", this.height).attr("id","viz");
+	this.svg.append("rect")
+    	.attr("width", this.width)
+    	.attr("height", this.height);
 
-this.svg.append("rect")
-    .attr("width", this.width)
-    .attr("height", this.height);
+	var nodes = force.nodes(),
+    	links = force.links(),
+    	node = this.svg.selectAll(".node");
 
-var nodes = force.nodes(),
-    links = force.links(),
-    node = this.svg.selectAll(".node");
-	//,link = svg.selectAll(".link");
+	viz.node = node.data(nodes);
 
-viz.node = node.data(nodes);
-
-this.movie.mRadius = 150;
-this.movie.mCircleX = viz.width/2;
-this.movie.mCircleY = viz.height*2/3; 
-if(this.movie.mCircleY+this.movie.mRadius > viz.height){this.movie.mCircleY = viz.height-this.movie.mRadius;}  
- addActors([this.movie.actors[0].name,this.movie.actors[1].name,this.movie.actors[2].name],[this.movie.actors[0].prominence,this.movie.actors[1].prominence,this.movie.actors[2].prominence]);
-addWriters(this.movie.writers);
-addDirector(this.movie.directors[0]);
-addMovieSelector();
-makeMovieCircle();
+	this.movie.mRadius = 150;
+	this.movie.mCircleX = viz.width/2;
+	this.movie.mCircleY = viz.height*2/3; 
+	if(this.movie.mCircleY+this.movie.mRadius > viz.height){
+		this.movie.mCircleY = viz.height-this.movie.mRadius;
+	}  
+ 	
+ 	addActors(
+ 		[
+ 			this.movie.actors[0].name,
+ 			this.movie.actors[1].name,
+ 			this.movie.actors[2].name
+ 		]
+ 		,[
+ 			this.movie.actors[0].prominence,
+ 			this.movie.actors[1].prominence,
+ 			this.movie.actors[2].prominence
+ 		]
+ 	);
+	
+	addWriters(this.movie.writers);
+	addDirector(this.movie.directors[0]);
+	addMovieSelector();
+	makeMovieCircle();
 
 	
 d3.selectAll("circle")
@@ -144,12 +155,23 @@ d3.selectAll("circle")
 	  d3.select(this).style("stroke-dasharray","0,0").style("stroke-width","2").style("fill","#fff");
 	  $("#status").html("");
 	  $("#writerEtAl text").text("et al.");
-  });
+  })
+  .on("click",function(){switchContextToActor($(this).attr("class"));});
 d3.selectAll("#movieCircle,.labels").on("click",function(){
 	alert("This will show a popup justifying our prediction");
 });
  
 } 
+
+function switchContextToActor(){
+	console.log(arguments);
+	console.log("Switching to context of just-clicked"); //alert("switching to context just clicked");
+  	//d3.select("#viz").remove();
+	viz = new Visualization();
+	//viz.addMovie($(this))
+	//viz.addMovie(targetMovieObj);
+	//viz.draw();
+}
 
 function addMovieSelector(){
  function addMovieCircles(movies,animateFrom){
@@ -551,6 +573,7 @@ function addDirector(director){
 		;
 	viz.svg.append("circle").attr("stroke-width",2).attr("stroke","red").attr("fill","white")
 		.attr("cx",viz.movie.mCircleX).attr("cy",viz.movie.mCircleY)
+		.attr("class","director")
 		.transition().delay(500)	
 		.attr("cx",viz.width-100).attr("cy",viz.movie.mCircleY+100).attr("r",50);
 	var text = viz.svg.append("g")
