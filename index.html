@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<meta name="author" content="Mat Kelly" />
+<style>
+
+body {margin: 0; padding: 0;}
+svg {width: 100%;}
+
+rect {
+  fill: none;
+  pointer-events: all;
+}
+
+.node {
+  fill: #eee;
+}
+
+.actor {fill: #fff;}
+
+.outline {
+	fill: #fff;
+	stroke-dasharray: 5,5; 
+    stroke-width: 2;
+}
+
+.arc {
+	stroke-dasharray: 5,5; 
+    stroke-width: 2;
+}
+.arcText{font:normal bold 12px/30px Arial;}
+
+#actorLine {fill: blue;}
+#directorLine {fill: red;}
+#writerLine {fill: green;}
+.actorLabel {font:normal normal 12px Arial;}
+
+.cursor {
+  fill: none;
+  stroke: brown;
+  pointer-events: none;
+}
+
+.link {
+  stroke: #999;
+}
+.polygon {
+    fill: #eee;
+	stroke: blue;
+	stroke-width: 2;
+	opacity: 1.0;
+}
+
+.polygonAppearing {
+	opacity: 0.5;
+	stroke-width: 1;
+}
+
+.polygonFaded {
+	opacity: 0.1;
+	stroke-width: 0;
+}
+circle:hover,.labels:hover {cursor: pointer;}
+
+#leftSwath:hover, #centerSwath:hover, #rightSwath:hover {fill: blue;}
+
+#status {position:absolute; bottom: 0; width: 100%; text-align: center; font-size: 18px; font-family: Arial, sans-serif;}
+
+.etal {font-style: italic;}
+.etalcircle {
+	stroke-width: 2;
+	stroke: green;
+	fill: white;
+}
+</style>
+<body>
+<script src="d3.v3.min.js"></script>
+<script src="jquery-2.0.0.min.js"></script>
+<script>
+
+function Visualization(){
+	this.addMovie = function(movieIn){
+		this.movie = movieIn;
+	}
+
+
+this.width = 1200;
+this.height = 600;
+
+var fill = d3.scale.category20();
+
+
+var force = d3.layout.force()
+    .size([this.width, this.height])
+    .nodes([{}]) // initialize with a single node
+    .linkDistance(30)
+    //.charge(-60)
+    .on("tick", tick);
+this.draw = function(){
+
+this.svg = d3.select("body").append("svg").attr("width", this.width)
+    .attr("height", this.height).attr("id","viz");
+
+this.svg.append("rect")
+    .attr("width", this.width)
+    .attr("height", this.height);
+
+var nodes = force.nodes(),
+    links = force.links(),
+    node = this.svg.selectAll(".node");
+	//,link = svg.selectAll(".link");
+
+viz.node = node.data(nodes);
+
+this.movie.mRadius = 150;
+this.movie.mCircleX = viz.width/2;
+this.movie.mCircleY = viz.height*2/3; 
+if(this.movie.mCircleY+this.movie.mRadius > viz.height){this.movie.mCircleY = viz.height-this.movie.mRadius;}  
+ addActors([this.movie.actors[0].name,this.movie.actors[1].name,this.movie.actors[2].name],[this.movie.actors[0].prominence,this.movie.actors[1].prominence,this.movie.actors[2].prominence]);
+addWriters(this.movie.writers);
+addDirector(this.movie.directors[0]);
+addMovieSelector();
+makeMovieCircle();
+
+	
+d3.selectAll("circle")
+ .on("mouseover",function(){
+	  if(d3.select(this).attr("id") == "movieCircle"){return;}
+	  d3.select(this).style("stroke-dasharray","2,2").style("fill","#eee");
+	  var clase = $(this).attr("class");
+	  
+	  if (typeof clase === 'undefined'){return;}	//circle has no class, do not try indexof
+	  
+	  if($(this).attr("class").indexOf("actor") > -1){ //jquery hasclass fails, do it the old way
+			var aIndex = d3.select(this).attr("id").substr(-1,1);
+			$("#status").html("Click this circle to put the visualization focus into actor-centric mode rather than movie mode with the center actor being "+$("#actorLabel"+aIndex).text());
+	  }else if(d3.select(this).attr("class").indexOf("etalcircle") > -1){
+		console.log(d3.select(this));
+			var wName = d3.select(this).attr("title");
+			d3.select("#writerEtAl text").text(wName);
+	  }  
+  })
+ .on("mouseout",function(){
+	  if(d3.select(this).attr("id") == "movieCircle"){return;}
+	  d3.select(this).style("stroke-dasharray","0,0").style("stroke-width","2").style("fill","#fff");
+	  $("#status").html("");
+	  $("#writerEtAl text").text("et al.");
+  });
+d3.selectAll("#movieCircle,.labels").on("click",function(){
+	alert("This will show a popup justifying our prediction");
+});
+ 
+} 
+
+function addMovieSelector(){
+ function addMovieCircles(movies,animateFrom){
+  for(var m=0; m<movies.length; m++){
+   var w = 25+45*(m+1);
+   var cc = viz.svg.insert("circle")
+   .attr("stroke","black")
+   .attr("stroke-width","2")
+   .attr("r", "20")
+   .attr("fill","white")
+   .attr("title",movies[m].title)
+   .attr("cx",movieSelectorCircleCoords[0])
+   .attr("cy",movieSelectorCircleCoords[1])
+   .on("click",function()
+		{
+			var targetMovieObj;
+			for(var mm=0; mm<allMovies.length;mm++){
+				if(movies[mm].title == d3.select(this).attr("title")){
+					targetMovieObj = movies[mm]; break;
+				}
+			}
+			d3.select("#viz").remove();
+			viz = new Visualization();
+			viz.addMovie(targetMovieObj);
+			viz.draw();
+		}
+	)
+   .transition()
+   .delay(250*(m+1))
+   .attr("cx",movieSelectorCircleCoords[0])
+   .attr("cy",w);
+   
+   var title = viz.svg.append("g").append("text")
+   	.attr("dx",movieSelectorCircleCoords[0])
+	.attr("dy",movieSelectorCircleCoords[1])
+	.text(movies[m].title)
+	.style("font","10px Arial")
+	.transition()
+	.attr("dx", viz.width-120)
+	.attr("dy", w);
+  }
+ }
+ 
+ 
+ var movieSelectorCircleCoords = [viz.width,25];
+ var movieSelectorOpen = false;
+ createMovieSelectorCircle();
+ function createMovieSelectorCircle(){
+  var movieSelectorCircle = viz.svg.insert("circle", ".cursor")
+  .attr("stroke","black")
+  .attr("stroke-width","2")
+  .attr("cx",movieSelectorCircleCoords[0])
+  .attr("cy",movieSelectorCircleCoords[1])
+  .attr("r", "20")
+  .attr("fill","white")
+  .attr("id","movieSelectorCircle")
+  .style("opacity","0.5")
+  .on("mouseover",function(t){d3.select(this).style("opacity","1.0");})
+  .on("mouseout",function(){d3.select(this).style("opacity","0.1");})
+  .on("click",function(){//show all movie circles, add X to this one
+    //remove the currently displayed movie
+	var moviesWithoutCurrent = [];
+	
+	for(var mm=0; mm<allMovies.length; mm++){ //yeeeeeeeah, splice isn't working correctly here.
+		//console.log(mm+"<"+allMovies.length);
+		if(viz.movie.title != allMovies[mm].title){
+			moviesWithoutCurrent.push(allMovies[mm]);
+		}
+	}
+	
+	addMovieCircles(moviesWithoutCurrent);
+	
+	
+	//d3.select("#movieSelcetorText").style("opacity","0.0");
+	d3.select("#movieSelectorText").style("opacity","1.0").transition().style("opacity","0.0");
+	d3.select("#movieSelectorCircle").style("opacity","1.0").transition().style("opacity","0.0");
+	viz.svg.insert("circle", ".cursor")
+	  .attr("stroke","black")
+	  .attr("stroke-width","2")
+	  .attr("cx",viz.movie.mCircleX)
+	  .attr("cy",viz.movie.mCircleX)
+	  .attr("r", viz.movie.mCircleRadius)
+	  .attr("fill","#eee")
+	  .transition()
+	  .delay(1000)
+  	  .attr("cx",(movieSelectorCircleCoords[0]+viz.movie.mCircleX)/2)
+	  .attr("cy",(movieSelectorCircleCoords[1]+viz.movie.mCircleY)/2)
+	  .attr("r",20+viz.movie.mCircleRadius/2)
+	  .delay(1000)
+	  .attr("cx",movieSelectorCircleCoords[0])
+	  .attr("cy",movieSelectorCircleCoords[1])
+	  .attr("r","20")
+	  .ease("linear");
+	var movieSelectorText = viz.svg.append("g").append("text")
+	   .attr("id","movieSelectorText")
+	   .attr("dx",movieSelectorCircleCoords[0])
+	   .attr("dy",movieSelectorCircleCoords[1])
+	   .text(viz.movie.title)
+	   .style("font","italic 10px Arial")
+	   .style("opacity","0.0")
+	   .transition()
+	   .delay(1000)
+	   .attr("dx", viz.width-120)
+	   .attr("dy", 25)
+	   .style("opacity","1.0"); 
+	movieSelectorOpen = true;
+  });
+  var movieSelectorText = viz.svg.append("g").append("text")
+		.attr("id","movieSelectorText")
+		.attr("dx", viz.width-110)
+		.attr("dy", 25)
+		.text("Movie Selector >")
+		.style("font","10px Arial"); 
+ }
+  
+  
+}
+
+function makeMovieCircle(){
+viz.node.enter().insert("circle", ".cursor")
+  .attr("stroke","black")
+  .attr("stroke-width","2")
+  .attr("class", "node movie")
+  .attr("cx",viz.movie.mCircleX)
+  .attr("cy",viz.movie.mCircleY)
+  .attr("id","movieCircle")
+  .attr("r", "1")
+  .transition()
+  .attr("r", viz.movie.mRadius);
+	var text = viz.svg.append("g")
+		.attr("class", "labels");
+	  var title = text.append("text")
+		.attr("dx", viz.width/2-90)
+		.attr("dy", viz.node.attr("cy")-80)
+		.text(viz.movie.title)
+		.style("font","36px Arial");
+	text.append("text")
+		.attr("dx", viz.node.attr("cx")-120)
+		.attr("dy", viz.node.attr("cy")-60)
+		.text("Projected:")
+		.style("font","bold 18px Arial");
+	text.append("text")
+		.attr("dx", viz.node.attr("cx")-110)
+		.attr("dy", viz.node.attr("cy")-40)
+		.text("Viewer Rating: 7.4")
+		.style("font","14px Arial");
+	text.append("text")
+		.attr("dx", viz.node.attr("cx")-110)
+		.attr("dy", viz.node.attr("cy")-20)
+		.text("Box Office Take: 30.3mil")
+		.style("font","14px Arial");
+
+  
+	makeArc(-Math.PI/2,Math.PI/2,"actorLine","Actor Prominence");	  
+	makeArc(Math.PI/2,Math.PI,"directorLine","Director Prominence");	 
+	makeArc(Math.PI,Math.PI*3/2,"writerLine","Writer Prominence");	
+}
+
+
+
+	
+function tick() {
+  node.attr("cx", function(d) { return d.x; })
+      .attr("cy", function(d) { return d.y; });
+}	  
+
+function makeArc(sAng,fAng,id,title){	  	  
+ var arc = d3.svg.arc()
+    .innerRadius(165)
+    .outerRadius(167)
+    .startAngle(sAng+0.05) //converting from degs to radians
+    .endAngle(fAng-0.05); //just radians
+ viz.svg.append("path")
+    .attr("d", arc)
+	.attr("class","arc")
+	.attr("id",id)
+    .attr("transform", "translate("+viz.movie.mCircleX+","+viz.movie.mCircleY+"),rotate(-45)")
+	.transition()
+    .attr("transform", "translate("+viz.movie.mCircleX+","+viz.movie.mCircleY+"),rotate(0)");
+
+ var text = viz.svg.append("text")
+    .attr("x", 200*(fAng-sAng)/Math.PI)
+    .attr("dy", -5);
+
+ text.append("textPath")
+    .attr("xlink:href","#"+id)
+	.attr("class","arcText")
+    .text(title);
+}
+
+function addActors(names,prominences){
+  //names should be like ["John Smith","Joe Biden","Mary Allen"]
+  //prominences should be like relative to each other, [4,2,1] means 0 is double 1, which is double 2
+  
+  maxProminence = 0;
+  for(p in prominences){
+   if(prominences[p] > maxProminence){maxProminence = prominences[p];}
+  }
+  
+  pos = [[100,viz.movie.mCircleY-100],[viz.movie.mCircleX,Math.max(50*prominences[1]/maxProminence+5,viz.height-viz.movie.mCircleX-100)],[viz.width-100,viz.movie.mCircleY-100]];
+  
+  var r = [50*prominences[0]/maxProminence,50*prominences[1]/maxProminence,50*prominences[2]/maxProminence];
+  
+  //setup swaths
+  var poly1point1 = (pos[0][0]+r[0])+","+pos[0][1];
+  var poly1point2 = pos[0][0]+","+(pos[0][1]+r[0]);
+  var poly1point3 = (-10*pos[0][0])+","+(pos[0][1]-r[0]);
+  var poly1point4 = "00,100";
+  
+  //setup how "full" the swaths should be relative to the actors' relative prominence, then
+  // base the polygon points off of it
+  var poly2scalar = prominences[1]/maxProminence;
+  var poly2point1 = (pos[1][0]-(r[1]*poly2scalar))+","+pos[1][1];
+  var poly2point2 = (pos[1][0]+(r[1]*poly2scalar))+","+pos[1][1];
+  var poly2point3 = (pos[1][0]+r[1]*(1+poly2scalar))+",-100";
+  var poly2point4 = (pos[1][0]-r[1]*(1+poly2scalar))+",-100";
+  
+  var poly3scalar = prominences[2]/maxProminence;
+  var poly3point1 = (pos[2][0]+r[2]*poly3scalar)+","+pos[2][1];
+  var poly3point2 = (pos[2][0]-r[2]*poly3scalar)+","+pos[2][1];
+  var poly3point3 = viz.width+100+","+(pos[2][1]-100*(1+poly3scalar));
+  var poly3point4 = (viz.width+100)+","+(pos[2][1]-[2]*poly3scalar);
+  
+  //concatenate swaths to polygon coordinate strings
+  var leftPoly = poly1point1+" "+poly1point2+" "+poly1point3+" "+poly1point4;
+  var topPoly = poly2point1+" "+poly2point2+" "+poly2point3+" "+poly2point4;
+  var rightPoly = poly3point1+" "+poly3point2+" "+poly3point3+" "+poly3point4;
+  
+  //add swaths to canvas
+  viz.svg.insert("polygon").attr("id","leftSwath").attr("title",names[0]).attr("points",leftPoly).attr("class","polygon").style("opacity","0").transition().delay(1500).style("opacity","1.0");
+  viz.svg.insert("polygon").attr("id","centerSwath").attr("title",names[1]).attr("points",topPoly).attr("class","polygon").style("opacity","0").transition().delay(1500).style("opacity","1.0");
+  viz.svg.insert("polygon").attr("id","rightSwath").attr("title",names[2]).attr("points",rightPoly).attr("class","polygon").style("opacity","0").transition().delay(1500).style("opacity","1.0");
+
+  d3.selectAll("polygon")
+  .on("mouseover",function(){
+	$("#status").html("Click this swath to get more info "+d3.select(this).attr("title")+"'s other movies");
+	/*$.ajax({
+		url:"actors.json"
+	}).done(function(resp){
+		JSON.parse(resp);
+	});*/
+	
+  })
+  .on("mouseout",function(){
+	$("#status").html("");
+  })
+  .on("click",function(){
+	//alert(d3.select(this).attr("id"));
+  });
+  
+  
+  //add actors
+  for(var a=0; a<names.length; a++){
+    //line to circle
+	viz.svg.append("svg:line")
+        .attr("x1", viz.movie.mCircleX)
+        .attr("y1", viz.movie.mCircleY)
+		.attr("x2", viz.movie.mCircleX)
+		.attr("y2", viz.movie.mCircleY)
+        .style("stroke-width", 2).style("stroke","#fff").style("stroke-width","2")
+		.transition()
+		.delay(0)
+        .attr("x2", pos[a][0])
+        .attr("y2", pos[a][1])
+		.style("stroke", "rgb(6,120,155)")
+        .style("stroke-width", 2).attr("class","pathy").style("stroke","#000").style("stroke-width","2")
+		;
+        
+
+
+    var r = 50*prominences[a]/maxProminence;
+	var c = viz.svg.insert("circle")
+      .attr("stroke","blue")
+	  .attr("stroke-width","2")
+      .attr("class", "node actor")
+	  .attr("id","actorCircle"+a)
+	  .attr("fill","blue")
+	  .attr("cx",viz.movie.mCircleX)
+	  .attr("cy",viz.movie.mCircleY)
+	  .attr("r",1)
+	  .transition()
+	  .duration(2000)
+	  .attr("cx",pos[a][0])
+	  .attr("cy",pos[a][1])
+      .attr("r", r)
+	  .ease("elastic");
+
+	  /*
+	d3.select("actorCircle"+a).on("mouseover",function(){
+		alert('foo');
+		$("#status").html("Click this circle to put the visualization focus into actor-centric mode rather than movie mode with the center actor being "+names[a]);
+	  });*/
+	  /*.on("mouseout",function(){
+		$("#status").html("");
+	  })
+	  .on("click",function(){
+		//alert(d3.select(this).attr("id"));
+	  });*/
+  
+	var text = viz.svg.append("g")
+    .attr("class", "actorLabel")
+    .attr("title", names[a])
+    .append("text")
+	.attr("id","actorLabel"+a)
+	.attr("dx",pos[a][0])
+	.attr("dy",pos[a][1])
+	//.style("font-size","100")
+	.transition()
+	.delay(1000)
+	//.style("font-size","12")
+    .attr("dx", pos[a][0]-32)
+    .attr("dy", pos[a][1]+r+15)
+    .text(names[a])
+	.ease("elastic")
+   }
+}
+
+function addWriters(writers){
+	viz.svg.append("svg:line")
+        .attr("x1", viz.movie.mCircleX)
+        .attr("y1", viz.movie.mCircleY)
+		.attr("x2", viz.movie.mCircleX)
+		.attr("y2", viz.movie.mCircleY)
+        .style("stroke-width", 2).style("stroke","#fff").style("stroke-width","2")
+		.transition()
+		.delay(0)
+        .attr("x2", 100)
+        .attr("y2", viz.movie.mCircleY+100)
+		.style("stroke", "rgb(6,120,155)")
+        .style("stroke-width", 2).attr("class","pathy").style("stroke","#000").style("stroke-width","2")
+		;
+		
+	viz.svg.append("circle")
+	.attr("cx",viz.movie.mCircleX)
+	.attr("cy",viz.movie.mCircleY)
+	.attr("class","writer")
+	.attr("stroke-width",2)
+	.attr("stroke","green")
+	.attr("fill","white")
+	.attr("r",0)
+	.transition()
+	.delay(500)
+    .attr("cx",100)
+	.attr("cy",viz.movie.mCircleY+100)
+	.attr("r",50);
+	
+	
+	var text = viz.svg.append("g")
+		.attr("class", "actorLabel")
+		.append("text")
+		.attr("dx",viz.movie.mCircleX)
+		.attr("dy",viz.movie.mCircleY)
+		.transition()
+		.delay(500)	
+	.attr("dx",100-32)
+	.attr("dy",viz.movie.mCircleY+100+50+15)
+    .text(writers[0].name);
+	
+	if(viz.movie.writers.length <= 1){return;} //no need for et al. circles when there was no et al.
+	
+	
+	for(var w=1; w<Math.min(4,viz.movie.writers.length); w++){
+		viz.svg.append("circle").attr("class","etalcircle").attr("r",15)	
+			.attr("cx",viz.movie.mCircleX).attr("cy",viz.movie.mCircleY)
+			.attr("title",viz.movie.writers[w].name)
+			.transition().delay(1000)
+			.attr("cx",viz.movie.mCircleX/2+40*w).attr("cy",viz.height-20);
+	}
+		
+	var text = viz.svg.append("g")
+		.attr("class", "etal")
+		.attr("id","writerEtAl")
+		.append("text")
+		.attr("dx",viz.movie.mCircleX)
+		.attr("dy",viz.movie.mCircleY)
+		.transition()
+		.delay(1500)	
+	.attr("dx",viz.movie.mCircleX/2).attr("dy",viz.height-40)
+    .text("et al.");	
+	
+	
+		
+}
+
+
+function addDirector(director){
+	viz.svg.append("svg:line")
+        .attr("x1", viz.movie.mCircleX)
+        .attr("y1", viz.movie.mCircleY)
+		.attr("x2", viz.movie.mCircleX)
+		.attr("y2", viz.movie.mCircleY)
+        .style("stroke-width", 2).style("stroke","#fff").style("stroke-width","2")
+		.transition()
+		.delay(0)
+        .attr("x2", viz.width-100)
+        .attr("y2", viz.movie.mCircleY+100)
+		.style("stroke", "rgb(6,120,155)")
+        .style("stroke-width", 2).attr("class","pathy").style("stroke","#000").style("stroke-width","2")
+		;
+	viz.svg.append("circle").attr("stroke-width",2).attr("stroke","red").attr("fill","white")
+		.attr("cx",viz.movie.mCircleX).attr("cy",viz.movie.mCircleY)
+		.transition().delay(500)	
+		.attr("cx",viz.width-100).attr("cy",viz.movie.mCircleY+100).attr("r",50);
+	var text = viz.svg.append("g")
+		.attr("class", "directorLabel")
+		.append("text")
+		.attr("dx",viz.movie.mCircleX)
+		.attr("dy",viz.movie.mCircleY)
+		.transition()
+		.delay(500)
+		.attr("dx",viz.width-100-32)
+		.attr("dy",viz.movie.mCircleY+100+50+15)
+		.text(director.name);
+	
+}
+
+
+	  
+	
+
+} //end visualization class
+
+function Actor(nameIn,prominenceIn){
+	this.name = nameIn; this.prominence=prominenceIn;
+}
+
+function Writer(nameIn){
+	this.name = nameIn;
+}
+
+function Director(nameIn){
+	this.name = nameIn;
+	this.x = viz.width-100;
+	this.y = viz.mCircleY+100;
+}
+
+function Movie(titleIn,actorsIn,writersIn,directorsIn){
+	this.title = titleIn;
+	this.actors = actorsIn;
+	this.writers = writersIn;
+	this.directors = directorsIn;
+}
+
+viz = new Visualization();
+
+
+
+//3-29
+var giJoe = new Movie("G.I. Joe: Retaliation",[new Actor("Dwayne Johnson",10),new Actor("Jonathan Pryce",2),new Actor("Byung-hun Lee",1)],[new Writer("Rhett Reese"),new Writer("Paul Wernick")],[new Director("Jon M. Chu")]);//3-29
+var theHost = new Movie("The Host",[new Actor("Rachel Robert",11),new Actor("Shyaam Karra",3),new Actor("Brent Wendell William",1)],[new Writer("Stephanie Meyer"),new Writer("Andrew Niccol")],[new Director("Andew Niccol")]);
+//April 19, 2013
+var oblivion = new Movie("Oblivion",[new Actor("Tom Cruise",30),new Actor("Morgan Freeman",20),new Actor("Olga Kurlenko",5)],
+				 [new Writer("Joseph Kosinski")],[new Director("Joseph Kosinski")]);
+//April 26, 2013
+var bigWedding = new Movie("The Big Wedding",[new Actor("Robert De Niro",30),new Actor("Katherine Heigl",15),new Actor("Diane Keaton",20)],[new Writer("Justin Zackham"), new Writer("Jean-Stephane Bron")],[new Director("Justin Zackham")])
+var painAndGain = new Movie("Pain & Gain",[new Actor("Mark Wahlberg",5),new Actor("Dwayne Johnson",4),new Actor("Anthony Mackie",2)],[new Writer("Christopher Markus"),new Writer("Stephen McFeely")],[new Director("Michael Bay")])
+
+//May 3, 2013
+var ironMan = new Movie("Iron Man 3",[new Actor("Robert Downney Jr.",30),new Actor("Gwyneth Paltrow",35),new Actor("Don Cheadle",14)],[new Writer("Drew Pearce"),new Writer("Shane Black")],[new Director("Shane Black")])	
+
+allMovies = [giJoe,theHost,oblivion,bigWedding,painAndGain,ironMan];
+			 
+viz.addMovie(oblivion);
+viz.draw();
+
+for(var movie in allMovies){
+	console.log("For movie "+allMovies[movie].title);
+	console.log("Fetching actors...")
+	for(var actor in allMovies[movie].actors){
+		console.log(" > For actor "+allMovies[movie].actors[actor].name+" fetching all movies present");
+		var moviesIn = ["movieA","movieB","movie3"];
+		/*$.ajax({
+			url:"http://www.imdb.com/xml/find?json=1&nr=1&nm=on&q="+allMovies[movie].actors[actor].name
+		}).done(function(resp){
+			console.log(resp);
+		});*/
+		/*
+		$.ajax({
+  url: "http://fiddle.jshell.net/favicon.png",
+  beforeSend: function ( xhr ) {
+    xhr.overrideMimeType("text/plain; charset=x-user-defined");
+  }
+}).done(function ( data ) {
+  if( console && console.log ) {
+    console.log("Sample of data:", data.slice(0, 100));
+  }
+});
+		
+		
+		for(var min in moviesIn){
+			console.log(" > > For movie "+moviesIn[min]+", get top 3 actors");
+		}
+		*/
+	}
+}
+
+</script>
+<p id="status"></p>
+</body>
+</html>
