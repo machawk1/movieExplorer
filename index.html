@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <meta charset="utf-8">
 <meta name="author" content="Mat Kelly" />
+<title>Graph-Based Navigation of a Box Ofﬁce Prediction System</title>
 <style>
 
 body {margin: 0; padding: 0;}
@@ -156,18 +157,73 @@ d3.selectAll("circle")
 	  $("#status").html("");
 	  $("#writerEtAl text").text("et al.");
   })
-  .on("click",function(){switchContextToActor($(this).attr("class"));});
+  .on("click",function(){switchContext($(this));});
 d3.selectAll("#movieCircle,.labels").on("click",function(){
 	alert("This will show a popup justifying our prediction");
 });
  
 } 
 
-function switchContextToActor(){
-	console.log(arguments);
-	console.log("Switching to context of just-clicked"); //alert("switching to context just clicked");
+function reduceCenterCircleRadius(){
+	var r = $("#movieCircle").attr("r");
+	$("#movieCircle").attr("r",r*.95);
+	
+	if(r < 2){moveSelectedEntityToCenter();return;}
+	setTimeout(reduceCenterCircleRadius,0);
+}
+
+function moveSelectedEntityToCenter(){
+	console.log($("#movieCircle").attr("cx"));
+	
+	function moveSelectedCircleOneTenthDistanceCloserToCenter(oX,oY,i){
+		//this isn't working just yet. :(
+		if(i == 10){return;}
+		var e = $("#"+selectedEntity.attr("id"));
+		var entity = $("#"+selectedEntity.attr("id"));
+		console.log("P"+($("#movieCircle").attr("cy") +"-"+ $(e).attr("cy")) +"*"+ (1-(0.1*i)));
+		var newX = (($("#movieCircle").attr("cx") - $(selectedEntity).attr("cx")) * 1-(0.1*i)) + oX;
+		var newY = (($("#movieCircle").attr("cy") - $(selectedEntity).attr("cy")) * 1-(0.1*i)) + oY;
+		
+		$(e).attr("cx",newX);
+		$(e).attr("cy",newY);
+		console.log("newX = "+newX+"  newY = "+newY);
+		setTimeout(function(){
+			moveSelectedCircleOneTenthDistanceCloserToCenter(oX,oY,++i);
+		},100);
+	}
+	//var e = $("#"+selectedEntity.attr("id"));
+	//this should be :( moveSelectedCircleOneTenthDistanceCloserToCenter(selectedEntity.attr("cx"),selectedEntity.attr("cy"),0);
+	var e = $("#"+selectedEntity.attr("id"));
+	
+	//e.attr("cx",$(e).attr("cx") + $("#movieCircle").attr("cx"));
+	$("#"+selectedEntity.attr("id")).attr("cx",$("#movieCircle").attr("cx"));
+	$("#"+selectedEntity.attr("id")).attr("cy",$("#movieCircle").attr("cy"));
+	$("#"+selectedEntity.attr("id")).attr("r",viz.movie.mRadius);
+}
+
+var selectedEntity = null;
+function switchContext(newContextEntity){	
+	selectedEntity = newContextEntity; //make the selected circle accessible from outside of this funciton w/o parameterizing
+
+	$(".polygon,line,.label,.labels").fadeOut(175); //hide the lines and swaths
+	
+	var newContext = newContextEntity.attr("class").replace("node","").trim(); //figure out what type of entity was selected
+	console.log("Switching to new context: "+newContext);
+	
+	var previousClass = newContextEntity.attr("class"); //save the pre-manipulated class of the selected element
+	
+	//fade out all circles but the selected one
+	var circles = $("circle");
+	for(var c=0; c<circles.length; c++){
+		if($(circles[c]).attr("id") != $(newContextEntity).attr("id")){$(circles[c]).fadeOut(250);}
+	}
+	
+	
+	
+		reduceCenterCircleRadius();
+	
   	//d3.select("#viz").remove();
-	viz = new Visualization();
+	//viz = new Visualization();
 	//viz.addMovie($(this))
 	//viz.addMovie(targetMovieObj);
 	//viz.draw();
@@ -472,7 +528,7 @@ function addActors(names,prominences){
 	  });*/
   
 	var text = viz.svg.append("g")
-    .attr("class", "actorLabel")
+    .attr("class", "actorLabel label")
     .attr("title", names[a])
     .append("text")
 	.attr("id","actorLabel"+a)
@@ -520,7 +576,7 @@ function addWriters(writers){
 	
 	
 	var text = viz.svg.append("g")
-		.attr("class", "actorLabel")
+		.attr("class", "actorLabel label")
 		.append("text")
 		.attr("dx",viz.movie.mCircleX)
 		.attr("dy",viz.movie.mCircleY)
@@ -577,7 +633,7 @@ function addDirector(director){
 		.transition().delay(500)	
 		.attr("cx",viz.width-100).attr("cy",viz.movie.mCircleY+100).attr("r",50);
 	var text = viz.svg.append("g")
-		.attr("class", "directorLabel")
+		.attr("class", "directorLabel label")
 		.append("text")
 		.attr("dx",viz.movie.mCircleX)
 		.attr("dy",viz.movie.mCircleY)
