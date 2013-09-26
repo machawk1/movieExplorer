@@ -1,0 +1,69 @@
+
+body {margin: 0; padding: 0;}
+svg {width: 100%;}
+
+rect {
+  fill: none;
+  pointer-events: all;
+}
+
+.node {
+  fill: #eee;
+}
+
+.actor {fill: #fff;}
+
+.outline {
+	fill: #fff;
+	stroke-dasharray: 5,5; 
+    stroke-width: 2;
+}
+
+.arc {
+	stroke-dasharray: 5,5; 
+    stroke-width: 2;
+}
+.arcText{font:normal bold 12px/30px Arial;}
+
+#actorLine {fill: blue;}
+#directorLine {fill: red;}
+#writerLine {fill: green;}
+.actorLabel {font:normal normal 12px Arial;}
+
+.cursor {
+  fill: none;
+  stroke: brown;
+  pointer-events: none;
+}
+
+.link {
+  stroke: #999;
+}
+.polygon {
+    fill: #eee;
+	stroke: blue;
+	stroke-width: 2;
+	opacity: 1.0;
+}
+
+.polygonAppearing {
+	opacity: 0.5;
+	stroke-width: 1;
+}
+
+.polygonFaded {
+	opacity: 0.1;
+	stroke-width: 0;
+}
+circle:hover,.labels:hover {cursor: pointer;}
+
+#leftSwath:hover, #centerSwath:hover, #rightSwath:hover {fill: blue;}
+
+#status {position:absolute; bottom: 0; width: 100%; text-align: center; font-size: 18px; font-family: Arial, sans-serif;}
+
+.etal {font-style: italic;}
+.etalcircle {
+	stroke-width: 2;
+	stroke: green;
+	fill: white;
+}
