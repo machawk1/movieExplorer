@@ -135,7 +135,7 @@ this.draw = function(){
 	makeMovieCircle();
 
 	
-d3.selectAll("circle")
+d3.selectAll("circle.node")
  .on("mouseover",function(){
 	  if(d3.select(this).attr("id") == "movieCircle"){return;}
 	  d3.select(this).style("stroke-dasharray","2,2").style("fill","#eee");
@@ -204,6 +204,7 @@ function moveSelectedEntityToCenter(){
 
 var selectedEntity = null;
 function switchContext(newContextEntity){	
+	console.log(newContextEntity[0]);
 	selectedEntity = newContextEntity; //make the selected circle accessible from outside of this funciton w/o parameterizing
 
 	$(".polygon,line,.label,.labels").fadeOut(175); //hide the lines and swaths
@@ -285,6 +286,7 @@ function addMovieSelector(){
   .attr("r", "20")
   .attr("fill","white")
   .attr("id","movieSelectorCircle")
+  .attr("class","movieSelectorCircle")
   .style("opacity","0.5")
   .on("mouseover",function(t){d3.select(this).style("opacity","1.0");})
   .on("mouseout",function(){d3.select(this).style("opacity","0.1");})
