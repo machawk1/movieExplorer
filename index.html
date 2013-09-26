@@ -241,6 +241,7 @@ function addMovieSelector(){
    .attr("r", "20")
    .attr("fill","white")
    .attr("title",movies[m].title)
+   .attr("class","movieInSelector")
    .attr("cx",movieSelectorCircleCoords[0])
    .attr("cy",movieSelectorCircleCoords[1])
    .on("click",function()
@@ -257,6 +258,8 @@ function addMovieSelector(){
 			viz.draw();
 		}
 	)
+  .on("mouseover",function(t){d3.select(this).attr("fill","yellow");})
+  .on("mouseout",function(){d3.select(this).attr("fill","white")})
    .transition()
    .delay(250*(m+1))
    .attr("cx",movieSelectorCircleCoords[0])
@@ -293,7 +296,7 @@ function addMovieSelector(){
   .on("click",function(){//show all movie circles, add X to this one
     //remove the currently displayed movie
 	var moviesWithoutCurrent = [];
-	
+
 	for(var mm=0; mm<allMovies.length; mm++){ //yeeeeeeeah, splice isn't working correctly here.
 		//console.log(mm+"<"+allMovies.length);
 		if(viz.movie.title != allMovies[mm].title){
