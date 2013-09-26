@@ -289,7 +289,7 @@ function addMovieSelector(){
   .attr("class","movieSelectorCircle")
   .style("opacity","0.5")
   .on("mouseover",function(t){d3.select(this).style("opacity","1.0");})
-  .on("mouseout",function(){d3.select(this).style("opacity","0.1");})
+  .on("mouseout",function(){d3.select(this).style("opacity","0.5");})
   .on("click",function(){//show all movie circles, add X to this one
     //remove the currently displayed movie
 	var moviesWithoutCurrent = [];
