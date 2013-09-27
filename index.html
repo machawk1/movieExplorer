@@ -206,6 +206,7 @@ function addMovieSelector(){
 			   .attr("fill","white")
 			   .attr("title",movies[m].title)
 			   .attr("class","movieInSelector")
+			   .attr("context","movie")
 			   .attr("cx",movieSelectorCircleCoords[0])
 			   .attr("cy",movieSelectorCircleCoords[1])
 			   .on("click",function()
@@ -232,6 +233,7 @@ function addMovieSelector(){
 			   var title = viz.svg.append("g").append("text")
 			   	.attr("dx",movieSelectorCircleCoords[0])
 				.attr("dy",movieSelectorCircleCoords[1])
+				.attr("context","movie")
 				.text(movies[m].title)
 				.style("font","10px Arial")
 				.transition()
@@ -298,6 +300,7 @@ function addMovieSelector(){
 	   .attr("id","movieSelectorText")
 	   .attr("dx",movieSelectorCircleCoords[0])
 	   .attr("dy",movieSelectorCircleCoords[1])
+	   .attr("context","movie")
 	   .text(viz.centralNode.title)
 	   .style("font","italic 10px Arial")
 	   .style("opacity","0.0")
@@ -366,6 +369,7 @@ viz.node.enter().insert("circle", ".cursor")
 		 // This should probably be moved to where the rest of the logic is to 
 		 //  hide the movie context in factor of actor-only context elements.
 		$("#movieSelectorText").fadeOut().remove();
+		$("[context='movie']").fadeOut().remove();
 	}	
 }
 
@@ -662,6 +666,9 @@ function Movie(titleIn,actorsIn,writersIn,directorsIn){
 
 viz = new Visualization();
 
+
+//var actors = [];
+//actors["Morgan Freeman
 
 
 //3-29
