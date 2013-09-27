@@ -78,7 +78,7 @@ function Visualization(){
 		
 		d3.selectAll("circle.node")
 		 .on("mouseover",function(){
-			  if(d3.select(this).attr("id") == "movieCircle"){return;}
+			  if(d3.select(this).attr("id") == "centralNode"){return;}
 			  d3.select(this).style("stroke-dasharray","2,2").style("fill","#eee");
 			  var clase = $(this).attr("class");
 		  
@@ -94,13 +94,13 @@ function Visualization(){
 			  }  
 		  })
 		 .on("mouseout",function(){
-			  if(d3.select(this).attr("id") == "movieCircle"){return;}
+			  if(d3.select(this).attr("id") == "centralNode"){return;}
 			  d3.select(this).style("stroke-dasharray","0,0").style("stroke-width","2").style("fill","#fff");
 			  $("#status").html("");
 			  $("#writerEtAl text").text("et al.");
 		  })
 		  .on("click",function(){switchContext($(this));});
-		d3.selectAll("#movieCircle,.labels").on("click",function(){
+		d3.selectAll("#centralNode,.labels").on("click",function(){
 			alert("This will show a popup justifying our prediction");
 		});
 	}
@@ -109,24 +109,24 @@ function Visualization(){
 
 
 function reduceCenterCircleRadius(){
-	var r = $("#movieCircle").attr("r");
-	$("#movieCircle").attr("r",r*.95);
+	var r = $("#centralNode").attr("r");
+	$("#centralNode").attr("r",r*.95);
 	
 	if(r < 2){moveSelectedEntityToCenter();return;}
 	setTimeout(reduceCenterCircleRadius,0);
 }
 
 function moveSelectedEntityToCenter(){
-	console.log($("#movieCircle").attr("cx"));
+	console.log($("#centralNode").attr("cx"));
 	
 	function moveSelectedCircleOneTenthDistanceCloserToCenter(oX,oY,i){
 		//this isn't working just yet. :(
 		if(i == 10){return;}
 		var e = $("#"+selectedEntity.attr("id"));
 		var entity = $("#"+selectedEntity.attr("id"));
-		console.log("P"+($("#movieCircle").attr("cy") +"-"+ $(e).attr("cy")) +"*"+ (1-(0.1*i)));
-		var newX = (($("#movieCircle").attr("cx") - $(selectedEntity).attr("cx")) * 1-(0.1*i)) + oX;
-		var newY = (($("#movieCircle").attr("cy") - $(selectedEntity).attr("cy")) * 1-(0.1*i)) + oY;
+		console.log("P"+($("#centralNode").attr("cy") +"-"+ $(e).attr("cy")) +"*"+ (1-(0.1*i)));
+		var newX = (($("#centralNode").attr("cx") - $(selectedEntity).attr("cx")) * 1-(0.1*i)) + oX;
+		var newY = (($("#centralNode").attr("cy") - $(selectedEntity).attr("cy")) * 1-(0.1*i)) + oY;
 		
 		$(e).attr("cx",newX);
 		$(e).attr("cy",newY);
@@ -139,9 +139,9 @@ function moveSelectedEntityToCenter(){
 	//this should be :( moveSelectedCircleOneTenthDistanceCloserToCenter(selectedEntity.attr("cx"),selectedEntity.attr("cy"),0);
 	var e = $("#"+selectedEntity.attr("id"));
 	
-	//e.attr("cx",$(e).attr("cx") + $("#movieCircle").attr("cx"));
-	$("#"+selectedEntity.attr("id")).attr("cx",$("#movieCircle").attr("cx"));
-	$("#"+selectedEntity.attr("id")).attr("cy",$("#movieCircle").attr("cy"));
+	//e.attr("cx",$(e).attr("cx") + $("#centralNode").attr("cx"));
+	$("#"+selectedEntity.attr("id")).attr("cx",$("#centralNode").attr("cx"));
+	$("#"+selectedEntity.attr("id")).attr("cy",$("#centralNode").attr("cy"));
 	$("#"+selectedEntity.attr("id")).attr("r",viz.centralNode.mRadius);
 }
 
@@ -149,13 +149,32 @@ var selectedEntity = null;
 function switchContext(newContextEntity){	
 	selectedEntity = newContextEntity; //make the selected circle accessible from outside of this funciton w/o parameterizing
 
-	$(".polygon,line,.label,.labels,.arc").fadeOut(175); //hide the lines and swaths
-	$(".polygon,line,.label,.labels,.arc").remove(); //destroy these faded out elements
+	$(".polygon,line,.label,.labels,.arc,.arcText").fadeOut(175); //hide the lines and swaths
+	$(".polygon,line,.label,.labels,.arc,.arcText").remove(); //destroy these faded out elements
 
 	var newContext = newContextEntity.attr("class").replace("node","").trim(); //figure out what type of entity was selected
 	console.log("Switching to new context: "+newContext);
 	
+	//this is the wrong way to do it. We need to completely replace the node and restart the viz
 	viz.centralNode.title = $(newContextEntity[0]).attr("alt");
+	var selectedActorsName = $(newContextEntity[0]).attr("alt");
+	
+	var newCentralNode;
+	console.log(viz.centralNode);
+	//find index of actor in movie's list of actors
+	for(var actorI = 0; actorI < viz.centralNode.actors.length; actorI++){
+		if(viz.centralNode.actors[actorI].name == selectedActorsName){
+			newCentralNode = jQuery.extend(true, {}, viz.centralNode.actors[actorI]);
+			newCentralNode.mCircleX = viz.centralNode.mCircleX; //Apply the visual dimensions and location as the previous center
+			newCentralNode.mCircleY = viz.centralNode.mCircleY;
+			newCentralNode.mRadius = viz.centralNode.mRadius;
+			newCentralNode.title = newCentralNode.name;
+			
+			break;
+		}
+	}
+	viz.centralNode = newCentralNode;
+	
 	makeMovieCircle();
 	
 	var previousClass = newContextEntity.attr("class"); //save the pre-manipulated class of the selected element
@@ -310,7 +329,7 @@ viz.node.enter().insert("circle", ".cursor")
   .attr("class", "node movie")
   .attr("cx",viz.centralNode.mCircleX)
   .attr("cy",viz.centralNode.mCircleY)
-  .attr("id","movieCircle")
+  .attr("id","centralNode")
   .attr("r", "1")
   .transition()
   .attr("r", viz.centralNode.mRadius);
@@ -337,10 +356,14 @@ viz.node.enter().insert("circle", ".cursor")
 		.text("Box Office Take: 30.3mil")
 		.style("font","14px Arial");
 
-  
-	makeArc(-Math.PI/2,Math.PI/2,"actorLine","Actor Prominence");	  
-	makeArc(Math.PI/2,Math.PI,"directorLine","Director Prominence");	 
-	makeArc(Math.PI,Math.PI*3/2,"writerLine","Writer Prominence");	
+    console.log("We know your type: "+viz.centralNode.type);
+  	if(viz.centralNode.type == "Movie"){
+		makeArc(-Math.PI/2,Math.PI/2,"actorLine","Actor Prominence");	  
+		makeArc(Math.PI/2,Math.PI,"directorLine","Director Prominence");	 
+		makeArc(Math.PI,Math.PI*3/2,"writerLine","Writer Prominence");
+	}else if(viz.centralNode.type == "Actor"){
+		makeArc(-Math.PI,Math.PI,"actorLine","Movies");	 
+	}	
 }
 
 
@@ -610,20 +633,24 @@ function addDirector(director){
 } //end visualization class
 
 function Actor(nameIn,prominenceIn){
+	this.type = "Actor"; //deep copy doesn't preserve data type so keep reference to what I am here.
 	this.name = nameIn; this.prominence=prominenceIn;
 }
 
 function Writer(nameIn){
+	this.type = "Writer"; 
 	this.name = nameIn;
 }
 
 function Director(nameIn){
+	this.type = "Director";
 	this.name = nameIn;
 	this.x = viz.width-100;
 	this.y = viz.mCircleY+100;
 }
 
 function Movie(titleIn,actorsIn,writersIn,directorsIn){
+	this.type = "Movie";
 	this.title = titleIn;
 	this.actors = actorsIn;
 	this.writers = writersIn;
