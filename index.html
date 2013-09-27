@@ -345,16 +345,19 @@ viz.node.enter().insert("circle", ".cursor")
 	text.append("text")
 		.attr("dx", viz.node.attr("cx")-120)
 		.attr("dy", viz.node.attr("cy")-60)
+		.attr("context","movie")
 		.text("Projected:")
 		.style("font","bold 18px Arial");
 	text.append("text")
 		.attr("dx", viz.node.attr("cx")-110)
 		.attr("dy", viz.node.attr("cy")-40)
+		.attr("context","movie")
 		.text("Viewer Rating: 7.4")
 		.style("font","14px Arial");
 	text.append("text")
 		.attr("dx", viz.node.attr("cx")-110)
 		.attr("dy", viz.node.attr("cy")-20)
+		.attr("context","movie")
 		.text("Box Office Take: 30.3mil")
 		.style("font","14px Arial");
 
