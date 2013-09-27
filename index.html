@@ -657,7 +657,7 @@ function Actor(nameIn,prominenceIn){
 	$.ajax({
 		url:"http://matkelly.com/projects/ieeevis/?actor=" + this.name
 	}).done(function(resp){
-		alert(resp);
+		console.log(resp);
 	}).error(function(status,error){
 		console.log(status);
 		console.log(error);
