@@ -149,8 +149,7 @@ var selectedEntity = null;
 function switchContext(newContextEntity){	
 	selectedEntity = newContextEntity; //make the selected circle accessible from outside of this funciton w/o parameterizing
 
-	$(".polygon,line,.label,.labels,.arc,.arcText").fadeOut(175); //hide the lines and swaths
-	$(".polygon,line,.label,.labels,.arc,.arcText").remove(); //destroy these faded out elements
+	$(".polygon,line,.label,.labels,.arc,.arcText").fadeOut(175).remove(); //hide the lines and swaths then destroy
 
 	var newContext = newContextEntity.attr("class").replace("node","").trim(); //figure out what type of entity was selected
 	console.log("Switching to new context: "+newContext);
@@ -363,6 +362,10 @@ viz.node.enter().insert("circle", ".cursor")
 		makeArc(Math.PI,Math.PI*3/2,"writerLine","Writer Prominence");
 	}else if(viz.centralNode.type == "Actor"){
 		makeArc(-Math.PI,Math.PI,"actorLine","Movies");	 
+		 
+		 // This should probably be moved to where the rest of the logic is to 
+		 //  hide the movie context in factor of actor-only context elements.
+		$("#movieSelectorText").fadeOut().remove();
 	}	
 }
 
