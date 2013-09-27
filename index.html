@@ -652,6 +652,17 @@ function addDirector(director){
 function Actor(nameIn,prominenceIn){
 	this.type = "Actor"; //deep copy doesn't preserve data type so keep reference to what I am here.
 	this.name = nameIn; this.prominence=prominenceIn;
+	
+	//try to get movies list for actor
+	$.ajax({
+		url:"http://matkelly.com/projects/ieeevis/?actor=" + this.name
+	}).done(function(resp){
+		alert(resp);
+	}).error(function(status,error){
+		console.log(status);
+		console.log(error);
+	});
+	
 }
 
 function Writer(nameIn){
