@@ -7,8 +7,13 @@ function Actor(nameIn,prominenceIn){
 		url:"http://matkelly.com/projects/ieeevis/?actor=" + this.name
 	}).done(function(resp){
 		//console.log(resp);
-		var obj = $.parseJSON(resp);
-		console.log(obj);
+		try{
+			var obj = $.parseJSON(resp);
+			console.log(obj);
+		}catch(e){
+			console.log(e.message);
+			console.log(resp);
+		}
 	}).error(function(status,error){
 		console.log(status);
 		console.log(error);

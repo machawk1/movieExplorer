@@ -156,9 +156,9 @@ function moveSelectedEntityToCenter(){
 var selectedEntity = null;
 function switchContext(newContextEntity){	
 	selectedEntity = newContextEntity; //make the selected circle accessible from outside of this funciton w/o parameterizing
-
+	
 	$(".polygon,line,.label,.labels,.arc,.arcText").fadeOut(175).remove(); //hide the lines and swaths then destroy
-
+    
 	var newContext = newContextEntity.attr("class").replace("node","").trim(); //figure out what type of entity was selected
 	console.log("Switching to new context: "+newContext);
 	
@@ -600,6 +600,7 @@ function addWriters(writers){
 	var text = viz.svg.append("g")
 		.attr("class", "etal")
 		.attr("id","writerEtAl")
+		.attr("context","movie")
 		.append("text")
 		.attr("dx",viz.centralNode.mCircleX)
 		.attr("dy",viz.centralNode.mCircleY)
