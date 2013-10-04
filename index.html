@@ -53,18 +53,13 @@ function Visualization(){
 		console.log("What is centralNode now?: " + this.centralNode.type);
 		
 		if(this.centralNode.type == "Movie"){
-		
+			console.log(this.centralNode);
 			//movie-specific, TODO: change this to any sort of central entity specific
-			addActors(
+			addActorNodes(
 				[
-					this.centralNode.actors[0].name,
-					this.centralNode.actors[1].name,
-					this.centralNode.actors[2].name
-				]
-				,[
-					this.centralNode.actors[0].prominence,
-					this.centralNode.actors[1].prominence,
-					this.centralNode.actors[2].prominence
+					this.centralNode.actors[0],
+					this.centralNode.actors[1],
+					this.centralNode.actors[2]
 				]
 			);
 		
@@ -74,7 +69,7 @@ function Visualization(){
 			makeMovieCircle();
 		}else if(this.centralNode.type == "Actor"){
 			//addMovies();
-			console.log("TODO: add addMovies(); ");
+			console.log("TODO: add movies nodes for actor here, fetched and associated elsewhere; ");
 			
 		}
 
@@ -417,9 +412,14 @@ function makeArc(sAng,fAng,id,title){
     .text(title);
 }
 
-function addActors(names,prominences){
+function addActorNodes(names){
   //names should be like ["John Smith","Joe Biden","Mary Allen"]
   //prominences should be like relative to each other, [4,2,1] means 0 is double 1, which is double 2
+  
+  var prominences = [];
+  for(var i in names){
+  	prominences[i] = actors[names[i]].prominence;
+  }
   
   maxProminence = 0;
   for(p in prominences){
