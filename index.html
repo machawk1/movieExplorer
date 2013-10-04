@@ -165,8 +165,8 @@ function switchContext(newContextEntity){
 	console.log(viz.centralNode);
 	//find index of actor in movie's list of actors
 	for(var actorI = 0; actorI < viz.centralNode.actors.length; actorI++){
-		if(viz.centralNode.actors[actorI].name == selectedActorsName){
-			newCentralNode = jQuery.extend(true, {}, viz.centralNode.actors[actorI]);
+		if(viz.centralNode.actors[actorI] == selectedActorsName){
+			newCentralNode = jQuery.extend(true, {}, actors[viz.centralNode.actors[actorI]]);
 			newCentralNode.mCircleX = viz.centralNode.mCircleX; //Apply the visual dimensions and location as the previous center
 			newCentralNode.mCircleY = viz.centralNode.mCircleY;
 			newCentralNode.mRadius = viz.centralNode.mRadius;
@@ -175,8 +175,11 @@ function switchContext(newContextEntity){
 			break;
 		}
 	}
+	console.log("Y");
+	console.log(viz.centralNode);
 	viz.centralNode = newCentralNode;
-	
+	console.log("X");
+	console.log(viz.centralNode);
 	makeMovieCircle();
 	
 	var previousClass = newContextEntity.attr("class"); //save the pre-manipulated class of the selected element
