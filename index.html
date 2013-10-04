@@ -13,7 +13,10 @@
 
 function Visualization(){
 	this.addMovie = function(movieIn){
-		this.centralNode = movieIn;
+		if(allMovies['Oblivion'].type == 'string'){this.centralNode = allMovies[movieIn];}
+		else if(allMovies['Oblivion'].type == 'Movie'){this.centralNode = movieIn;}
+		
+		//this.centralNode = movieIn;
 	}
 	this.drawBasicLayout = function(){
 		this.width = 1200; this.height = 600;
@@ -49,6 +52,8 @@ function Visualization(){
 		this.drawBasicLayout();	
 		viz.node = node.data(this.nodes);
 		this.setupCentralNode()
+		console.log("XPP");
+		console.log(actors);
 		
 		console.log("What is centralNode now?: " + this.centralNode.type);
 		
@@ -68,6 +73,15 @@ function Visualization(){
 			addMovieSelector();
 			makeMovieCircle();
 		}else if(this.centralNode.type == "Actor"){
+			console.log("X");
+			console.log(this.centralNode)
+			addActorNodes(
+				[
+					this.centralNode.movies[0],
+					this.centralNode.movies[1],
+					this.centralNode.movies[2]
+				]
+			);
 			//addMovies();
 			console.log("TODO: add movies nodes for actor here, fetched and associated elsewhere; ");
 			
@@ -175,11 +189,8 @@ function switchContext(newContextEntity){
 			break;
 		}
 	}
-	console.log("Y");
-	console.log(viz.centralNode);
 	viz.centralNode = newCentralNode;
-	console.log("X");
-	console.log(viz.centralNode);
+
 	makeMovieCircle();
 	
 	var previousClass = newContextEntity.attr("class"); //save the pre-manipulated class of the selected element
@@ -190,15 +201,7 @@ function switchContext(newContextEntity){
 		if($(circles[c]).attr("id") != $(newContextEntity).attr("id")){$(circles[c]).fadeOut(250);}
 	}
 	
-	
-	
-		reduceCenterCircleRadius();
-	
-  	//d3.select("#viz").remove();
-	//viz = new Visualization();
-	//viz.addMovie($(this))
-	//viz.addMovie(targetMovieObj);
-	//viz.draw();
+	reduceCenterCircleRadius();
 }
 
 function addMovieSelector(){
@@ -218,9 +221,10 @@ function addMovieSelector(){
 			   .on("click",function()
 					{
 						var targetMovieObj;
-						for(var mm=0; mm<allMovies.length;mm++){
-							if(movies[mm].title == d3.select(this).attr("title")){
-								targetMovieObj = movies[mm]; break;
+						console.log(allMovies);
+						for(var movieName in allMovies){
+							if(movieName == d3.select(this).attr("title")){
+								targetMovieObj = allMovies[movieName]; break;
 							}
 						}
 						d3.select("#viz").remove();
@@ -272,10 +276,11 @@ function addMovieSelector(){
     //remove the currently displayed movie
 	var moviesWithoutCurrent = [];
 
-	for(var mm=0; mm<allMovies.length; mm++){ //yeeeeeeeah, splice isn't working correctly here.
+	for(var movieName in allMovies){ //yeeeeeeeah, splice isn't working correctly here.
 		//console.log(mm+"<"+allMovies.length);
-		if(viz.centralNode.title != allMovies[mm].title){
-			moviesWithoutCurrent.push(allMovies[mm]);
+		console.log(viz.centralNode.title+" "+movieName);
+		if(viz.centralNode.title != movieName){
+			moviesWithoutCurrent.push(allMovies[movieName]);
 		}
 	}
 	
@@ -652,7 +657,7 @@ function addDirector(director){
 } //end visualization class
 
 var viz = new Visualization();	 
-viz.addMovie(oblivion); //oblivion is defined in the data.js file
+viz.addMovie(allMovies['Oblivion']); //oblivion is defined in the data.js file
 viz.draw();
 
 

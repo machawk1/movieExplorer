@@ -93,4 +93,10 @@ var ironMan = new Movie(
 	[new Director("Shane Black")]
 );	
 
-allMovies = [giJoe,theHost,oblivion,bigWedding,painAndGain,ironMan];
+allMovies = new Array();
+allMovies[giJoe.title] = 	giJoe;
+allMovies[theHost.title] = 	theHost;
+allMovies[oblivion.title] =	oblivion;
+allMovies[bigWedding.title] =bigWedding;
+allMovies[painAndGain.title]=painAndGain;
+allMovies[ironMan.title] =	ironMan;

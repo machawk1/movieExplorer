@@ -11,7 +11,7 @@ function Actor(nameIn,prominenceIn){
 		}).done(function(resp){
 			var lines = resp.split("\r\n");
 			var actorName = lines.splice(0,1);
-			
+			console.log("setting movies for "+actorName);
 			Actor.setMovies(actorName,lines);
 		}).error(function(status,error){
 			console.log(status);
