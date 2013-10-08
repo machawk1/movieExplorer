@@ -20,6 +20,7 @@ function Actor(nameIn,prominenceIn){
 	};
 	
 	this.setMovies = function(m){
+		console.log("SETTING MOVIES!");
 		this.movies = m;
 	}
 	

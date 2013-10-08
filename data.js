@@ -22,16 +22,27 @@ actors["Gwyneth Paltrow"] = new Actor("Gwyneth Paltrow",35);
 actors["Don Cheadle"] = new Actor("Don Cheadle",14);
 
 for(var actorName in actors){
+	console.log("Fetching movies for "+actorName);
 	actors[actorName].fetchMovies();
 }
 
-Actor.setMovies = function(actorName,movies){
+Actor.setMovies = function(actorName,movieLines){
+
 	if(actors[actorName]){
-		actors[actorName].movies = movies;
+		actors[actorName].movies = Movie.createArrayOfMoviesFromList(movieLines);
 		//console.log("new movie length for "+actorName+" = "+actors[actorName].movies.length);
 	}else {
 		console.log("There is no actor named '"+actorName+"' in our data");
 	}
+}
+
+Movie.createArrayOfMoviesFromList = function(movieLines){
+	var movies = new Array();
+	for(var ll=0; ll<movieLines.length; ll++){
+		var title = movieLines[ll].substr(movieLines[ll].indexOf(" "));
+		movies[title] = new Movie(title);
+	}
+	return movies;
 }
 
 Actor.audit = function(){

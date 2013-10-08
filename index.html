@@ -19,7 +19,7 @@ function Visualization(){
 		//this.centralNode = movieIn;
 	}
 	this.drawBasicLayout = function(){
-		this.width = 1200; this.height = 600;
+		this.width = 1200; this.height = 800;
 		var fill = d3.scale.category20();
 
 
@@ -49,7 +49,10 @@ function Visualization(){
     
     
 	this.draw = function(){
-		this.drawBasicLayout();	
+		if($("#viz").length < 1){	//only draw svg canvas if it hasn't already been drawn
+			this.drawBasicLayout();	
+		}
+		
 		viz.node = node.data(this.nodes);
 		this.setupCentralNode()
 		console.log("XPP");
@@ -74,15 +77,17 @@ function Visualization(){
 			makeMovieCircle();
 		}else if(this.centralNode.type == "Actor"){
 			console.log("X");
-			console.log(this.centralNode)
-			addActorNodes(
-				[
-					this.centralNode.movies[0],
-					this.centralNode.movies[1],
-					this.centralNode.movies[2]
-				]
+			console.log(this.centralNode);
+			console.log(actors[this.centralNode.title].movies);
+			
+			var moviesToAddToVis = actors[this.centralNode.title].movies;
+			addMovieNodesAroundActor(moviesToAddToVis 
+/*				[
+					moviesToAddToVis[0],
+					moviesToAddToVis[1],
+					moviesToAddToVis[2]
+				]*/
 			);
-			//addMovies();
 			console.log("TODO: add movies nodes for actor here, fetched and associated elsewhere; ");
 			
 		}
@@ -196,7 +201,7 @@ function switchContext(newContextEntity){
 	var previousClass = newContextEntity.attr("class"); //save the pre-manipulated class of the selected element
 	
 	//fade out all circles but the selected one
-	var circles = $("circle");
+	var circles = $("circle[context='movie']").fadeOut().remove();
 	for(var c=0; c<circles.length; c++){
 		if($(circles[c]).attr("id") != $(newContextEntity).attr("id")){$(circles[c]).fadeOut(250);}
 	}
@@ -420,12 +425,47 @@ function makeArc(sAng,fAng,id,title){
     .text(title);
 }
 
+function addMovieNodesAroundActor(movies){
+	var m = Object.keys(movies).length;//25;
+	var ang = 360 / m;
+	for(var i=0; i<m; i++){
+		var a = i * ang;
+		a = toRadians(a);
+		
+		var y = Math.round(-300*Math.sin(a) + 500);
+		var x = Math.round(-500*Math.cos(a) + 600);
+		console.log("("+x+","+y+")");
+
+		var r = 10;
+		var c = viz.svg.insert("circle")
+		  .attr("stroke","blue")
+		  .attr("stroke-width","2")
+		  .attr("class", "node movie")
+		  .attr("id","actorCircleX"+i)
+		  .attr("fill","blue")
+		  .attr("cx",x)
+		  .attr("cy",y)
+		  .attr("r", r);
+		console.log("Drawing circle at "+x+","+y);
+		function toDegrees (angle) {
+			return angle * (180 / Math.PI);
+		}
+
+		function toRadians (angle) {
+			return angle * (Math.PI / 180);
+		}
+	}
+  
+}
+
 function addActorNodes(names){
   //names should be like ["John Smith","Joe Biden","Mary Allen"]
   //prominences should be like relative to each other, [4,2,1] means 0 is double 1, which is double 2
   
   var prominences = [];
   for(var i in names){
+  	console.log(names[i]);
+  	console.log(actors[names[i]]);
   	prominences[i] = actors[names[i]].prominence;
   }
   
@@ -510,6 +550,7 @@ function addActorNodes(names){
       .attr("stroke","blue")
 	  .attr("stroke-width","2")
       .attr("class", "node actor")
+      .attr("context", "movie")
 	  .attr("id","actorCircle"+a)
 	  .attr("fill","blue")
 	  .attr("alt",names[a])
@@ -575,6 +616,7 @@ function addWriters(writers){
 	.attr("stroke-width",2)
 	.attr("stroke","green")
 	.attr("fill","white")
+	.attr("context","movie")
 	.attr("r",0)
 	.transition()
 	.delay(500)
@@ -639,6 +681,7 @@ function addDirector(director){
 	viz.svg.append("circle").attr("stroke-width",2).attr("stroke","red").attr("fill","white")
 		.attr("cx",viz.centralNode.mCircleX).attr("cy",viz.centralNode.mCircleY)
 		.attr("class","director")
+		.attr("context","movie")
 		.transition().delay(500)	
 		.attr("cx",viz.width-100).attr("cy",viz.centralNode.mCircleY+100).attr("r",50);
 	var text = viz.svg.append("g")
