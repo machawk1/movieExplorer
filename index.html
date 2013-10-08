@@ -426,7 +426,8 @@ function makeArc(sAng,fAng,id,title){
 }
 
 function addMovieNodesAroundActor(movies){
-	var m = Object.keys(movies).length;//25;
+	var movieNames = Object.keys(movies);
+	var m = movieNames.length;
 	var ang = 360 / m;
 	for(var i=0; i<m; i++){
 		var a = i * ang;
@@ -446,7 +447,8 @@ function addMovieNodesAroundActor(movies){
 		  .attr("cx",x)
 		  .attr("cy",y)
 		  .attr("r", r);
-		console.log("Drawing circle at "+x+","+y);
+		var movieName = movieNames[i];
+		console.log("Drawing circle at "+x+","+y+": "+movieName+" "+movies[movieName].id);
 		function toDegrees (angle) {
 			return angle * (180 / Math.PI);
 		}

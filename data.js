@@ -40,7 +40,8 @@ Movie.createArrayOfMoviesFromList = function(movieLines){
 	var movies = new Array();
 	for(var ll=0; ll<movieLines.length; ll++){
 		var title = movieLines[ll].substr(movieLines[ll].indexOf(" "));
-		movies[title] = new Movie(title);
+		movies[title] = new Movie(title); //we don't know other info without re-fetching the movie, maybe do this lazily
+		movies[title].id = movieLines[ll].substring(0,movieLines[ll].indexOf(" "));
 	}
 	return movies;
 }
