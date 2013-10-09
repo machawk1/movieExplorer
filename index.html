@@ -12,6 +12,12 @@
 <script>
 
 function Visualization(){
+	this.actorsloaded = 0;
+	this.updatePercentage = function(){
+		this.actorsloaded = ++(this.actorsloaded);
+		//console.log((this.actorsloaded) +"/"+numberOfActors);
+		$("#percentLoaded").text("Data "+parseInt(this.actorsloaded/numberOfActors * 100,10)+"% Loaded");
+	}
 	this.addMovie = function(movieIn){
 		if(allMovies['Oblivion'].type == 'string'){this.centralNode = allMovies[movieIn];}
 		else if(allMovies['Oblivion'].type == 'Movie'){this.centralNode = movieIn;}
@@ -98,7 +104,7 @@ function Visualization(){
 
 	this.setupNodeInteraction = function(){
 		
-		d3.selectAll("circle.node")
+		d3.selectAll("circle.node[context='movie']")
 		 .on("mouseover",function(){
 			  if(d3.select(this).attr("id") == "centralNode"){return;}
 			  d3.select(this).style("stroke-dasharray","2,2").style("fill","#eee");
@@ -121,7 +127,16 @@ function Visualization(){
 			  $("#status").html("");
 			  $("#writerEtAl text").text("et al.");
 		  })
-		  .on("click",function(){switchContext($(this));});
+		  .on("click",function(){
+		  	if($("#percentLoaded").text().indexOf("100% Loaded") == -1){return;}
+		  	switchContext($(this));}
+		  );
+		d3.selectAll("circle.node[context='actor']")
+		 .on("mouseover",function(){
+		 	console.log($(this));
+		 });
+		
+		
 		d3.selectAll("#centralNode,.labels").on("click",function(){
 			alert("This will show a popup justifying our prediction");
 		});
@@ -376,7 +391,15 @@ viz.node.enter().insert("circle", ".cursor")
 		.attr("context","movie")
 		.text("Box Office Take: 30.3mil")
 		.style("font","14px Arial");
-
+	//percent loaded
+	text.append("text")
+		.attr("dx", viz.node.attr("cx")-110)
+		.attr("dy", viz.node.attr("cy"))
+		.attr("context","movie")
+		.text("Data 0% Loaded")
+		.attr("id","percentLoaded")
+		.style("font","10px Arial");
+	
     console.log("We know your type: "+viz.centralNode.type);
   	if(viz.centralNode.type == "Movie"){
 		makeArc(-Math.PI/2,Math.PI/2,"actorLine","Actor Prominence");	  
@@ -427,16 +450,17 @@ function makeArc(sAng,fAng,id,title){
 
 function addMovieNodesAroundActor(movies){
 	var movieNames = Object.keys(movies);
-	var m = movieNames.length;
+	var m = Object.keys(movies).length;
 	var ang = 360 / m;
-	for(var i=0; i<m; i++){
+	var i = 0;
+	for(var movieName in Object.keys(movies)){
 		var a = i * ang;
 		a = toRadians(a);
 		
 		var y = Math.round(-300*Math.sin(a) + 500);
 		var x = Math.round(-500*Math.cos(a) + 600);
 		console.log("("+x+","+y+")");
-
+				
 		var r = 10;
 		var c = viz.svg.insert("circle")
 		  .attr("stroke","blue")
@@ -446,17 +470,18 @@ function addMovieNodesAroundActor(movies){
 		  .attr("fill","blue")
 		  .attr("cx",x)
 		  .attr("cy",y)
-		  .attr("r", r);
-		var movieName = movieNames[i];
-		console.log("Drawing circle at "+x+","+y+": "+movieName+" "+movies[movieName].id);
-		function toDegrees (angle) {
-			return angle * (180 / Math.PI);
-		}
-
-		function toRadians (angle) {
-			return angle * (Math.PI / 180);
-		}
+		  .attr("r", r)
+		  .on("mouseover",function(){
+				$("#status").html(movieName);
+				
+		   });
+		//var movieName = movieNames[i];
+		//console.log("Drawing circle at "+x+","+y+": "+movieName+" "+movies[movieName].id);
+		
+		i++;
 	}
+	function toDegrees (angle) {return angle * (180 / Math.PI);}
+	function toRadians (angle) {return angle * (Math.PI / 180);}
   
 }
 
@@ -504,7 +529,7 @@ function addActorNodes(names){
   var leftPoly = poly1point1+" "+poly1point2+" "+poly1point3+" "+poly1point4;
   var topPoly = poly2point1+" "+poly2point2+" "+poly2point3+" "+poly2point4;
   var rightPoly = poly3point1+" "+poly3point2+" "+poly3point3+" "+poly3point4;
-  
+    
   //add swaths to canvas
   viz.svg.insert("polygon").attr("id","leftSwath").attr("title",names[0]).attr("points",leftPoly).attr("class","polygon").style("opacity","0").transition().delay(1500).style("opacity","1.0");
   viz.svg.insert("polygon").attr("id","centerSwath").attr("title",names[1]).attr("points",topPoly).attr("class","polygon").style("opacity","0").transition().delay(1500).style("opacity","1.0");
@@ -512,7 +537,11 @@ function addActorNodes(names){
 
   d3.selectAll("polygon")
   .on("mouseover",function(){
-	$("#status").html("Click this swath to get more info "+d3.select(this).attr("title")+"'s other movies");
+    var actorObj = actors[$(this).attr('title')];
+	var actorsMoviesN = Object.keys(actorObj.movies).length;
+	$(this).attr("movieCount",actorsMoviesN);
+	console.log(actorObj.name+" has "+actorsMoviesN + " movies");
+	$("#status").html("Click this swath to get more info on "+d3.select(this).attr("title")+"'s other "+$(this).attr('movieCount')+" movies");
 	/*$.ajax({
 		url:"actors.json"
 	}).done(function(resp){
@@ -524,7 +553,7 @@ function addActorNodes(names){
 	$("#status").html("");
   })
   .on("click",function(){
-	//alert(d3.select(this).attr("id"));
+	
   });
   
   

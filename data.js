@@ -21,6 +21,7 @@ actors["Robert Downney Jr."] = new Actor("Robert Downney Jr.",30);
 actors["Gwyneth Paltrow"] = new Actor("Gwyneth Paltrow",35);
 actors["Don Cheadle"] = new Actor("Don Cheadle",14);
 
+var numberOfActors = Object.keys(actors).length;
 for(var actorName in actors){
 	console.log("Fetching movies for "+actorName);
 	actors[actorName].fetchMovies();

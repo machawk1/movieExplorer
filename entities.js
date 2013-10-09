@@ -7,15 +7,20 @@ function Actor(nameIn,prominenceIn){
 		//try to get movies list for actor
 		var movies;
 		$.ajax({
-			url:"http://matkelly.com/projects/ieeevis/?actor=" + this.name
+			url:"http://matkelly.com/projects/ieeevis/?actor=" + this.name//,
+			//timeout: 3000
 		}).done(function(resp){
 			var lines = resp.split("\r\n");
 			var actorName = lines.splice(0,1);
 			console.log("setting movies for "+actorName);
+			viz.updatePercentage();
 			Actor.setMovies(actorName,lines);
-		}).error(function(status,error){
+		}).fail(function(status,error,x){
+			console.log("error!");
 			console.log(status);
 			console.log(error);
+			console.log(x);
+			$("rect").addClass("error");
 		});
 	};
 	
