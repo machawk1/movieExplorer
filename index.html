@@ -465,7 +465,7 @@ function addMovieNodesAroundActor(movies){
 	var m = Object.keys(movies).length;
 	var ang = 360 / m;
 	var i = 0;
-	for(var movieNameI in Object.keys(movies)){
+	for(var movieName in movies){
 		var a = i * ang;
 		a = toRadians(a);
 		
@@ -474,22 +474,23 @@ function addMovieNodesAroundActor(movies){
 		console.log("("+x+","+y+")");
 				
 		var r = 10;
+		console.log("movieNameI = "+movieName);
+		console.log("movies[movieNameI] = "+movies[movieName]);
 		var c = viz.svg.insert("circle")
 		  .attr("stroke","blue")
 		  .attr("stroke-width","2")
-		  .attr("class", "node movie "+movieNameI)
 		  .attr("id","actorCircleX"+i)
-		  .attr("fill","blue")
+		  .attr("fill","white")
+		  .attr("val",movieName)
 		  .attr("cx",x)
 		  .attr("cy",y)
 		  .attr("r", r)
-		  .attr("val",movieNameI)
 		  .on("mouseover",function(){
-				$("#status").html($(this).attr("val"));
-				console.log(Object.keys(movies));
+				$("#status").text($(this).attr("val"));
+				console.log(movieName);
 		   })
 		   .on("mouseout",function(){
-		   	$("#status").html("");
+		   	$("#status").text("");
 		   });
 		   ;
 		//var movieName = movieNames[i];
