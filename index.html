@@ -17,6 +17,8 @@ function Visualization(){
 		this.actorsloaded = ++(this.actorsloaded);
 		//console.log((this.actorsloaded) +"/"+numberOfActors);
 		$("#percentLoaded").text("Data "+parseInt(this.actorsloaded/numberOfActors * 100,10)+"% Loaded");
+		//$("path,text").css("opacity",this.actorsloaded/numberOfActors);
+		//$("rect").attr("fill","red"); //doesn't work
 	}
 	this.addMovie = function(movieIn){
 		if(allMovies['Oblivion'].type == 'string'){this.centralNode = allMovies[movieIn];}
@@ -128,7 +130,17 @@ function Visualization(){
 			  $("#writerEtAl text").text("et al.");
 		  })
 		  .on("click",function(){
-		  	if($("#percentLoaded").text().indexOf("100% Loaded") == -1){return;}
+		  	if($("#percentLoaded").text().indexOf("100% Loaded") == -1){
+		  		//TODO: highlight percentloaded in red
+		  		$("#percentLoaded").css("font-size","48px");
+				$("#percentLoaded").animate({
+					fontSize: '12px'
+				  }, 250, function() {
+					// Animation complete.
+				  });
+		  		
+		  		return;
+		  	}
 		  	switchContext($(this));}
 		  );
 		d3.selectAll("circle.node[context='actor']")
@@ -453,7 +465,7 @@ function addMovieNodesAroundActor(movies){
 	var m = Object.keys(movies).length;
 	var ang = 360 / m;
 	var i = 0;
-	for(var movieName in Object.keys(movies)){
+	for(var movieNameI in Object.keys(movies)){
 		var a = i * ang;
 		a = toRadians(a);
 		
@@ -465,16 +477,21 @@ function addMovieNodesAroundActor(movies){
 		var c = viz.svg.insert("circle")
 		  .attr("stroke","blue")
 		  .attr("stroke-width","2")
-		  .attr("class", "node movie")
+		  .attr("class", "node movie "+movieNameI)
 		  .attr("id","actorCircleX"+i)
 		  .attr("fill","blue")
 		  .attr("cx",x)
 		  .attr("cy",y)
 		  .attr("r", r)
+		  .attr("val",movieNameI)
 		  .on("mouseover",function(){
-				$("#status").html(movieName);
-				
+				$("#status").html($(this).attr("val"));
+				console.log(Object.keys(movies));
+		   })
+		   .on("mouseout",function(){
+		   	$("#status").html("");
 		   });
+		   ;
 		//var movieName = movieNames[i];
 		//console.log("Drawing circle at "+x+","+y+": "+movieName+" "+movies[movieName].id);
 		
@@ -531,9 +548,9 @@ function addActorNodes(names){
   var rightPoly = poly3point1+" "+poly3point2+" "+poly3point3+" "+poly3point4;
     
   //add swaths to canvas
-  viz.svg.insert("polygon").attr("id","leftSwath").attr("title",names[0]).attr("points",leftPoly).attr("class","polygon").style("opacity","0").transition().delay(1500).style("opacity","1.0");
-  viz.svg.insert("polygon").attr("id","centerSwath").attr("title",names[1]).attr("points",topPoly).attr("class","polygon").style("opacity","0").transition().delay(1500).style("opacity","1.0");
-  viz.svg.insert("polygon").attr("id","rightSwath").attr("title",names[2]).attr("points",rightPoly).attr("class","polygon").style("opacity","0").transition().delay(1500).style("opacity","1.0");
+  viz.svg.insert("polygon").attr("id","leftSwath").attr("context","movie").attr("title",names[0]).attr("points",leftPoly).attr("class","polygon swath").style("opacity","0").transition().delay(1500).style("opacity","1.0");
+  viz.svg.insert("polygon").attr("id","centerSwath").attr("context","movie").attr("title",names[1]).attr("points",topPoly).attr("class","polygon swath").style("opacity","0").transition().delay(1500).style("opacity","1.0");
+  viz.svg.insert("polygon").attr("id","rightSwath").attr("context","movie").attr("title",names[2]).attr("points",rightPoly).attr("class","polygon swath").style("opacity","0").transition().delay(1500).style("opacity","1.0");
 
   d3.selectAll("polygon")
   .on("mouseover",function(){
