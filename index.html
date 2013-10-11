@@ -7,7 +7,6 @@
 <script src="d3.v3.min.js"></script>
 <script src="jquery-2.0.3.min.js"></script>
 <script src="jquery-migrate-1.2.1.js"></script>
-<script src="jquery.pulses.min.js"></script>
 <script src="entities.js"></script>
 <script src="data.js"></script>
 <script>
@@ -90,15 +89,7 @@ function Visualization(){
 			console.log(actors[this.centralNode.title].movies);
 			
 			var moviesToAddToVis = actors[this.centralNode.title].movies;
-			addMovieNodesAroundActor(moviesToAddToVis 
-/*				[
-					moviesToAddToVis[0],
-					moviesToAddToVis[1],
-					moviesToAddToVis[2]
-				]*/
-			);
-			console.log("TODO: add movies nodes for actor here, fetched and associated elsewhere; ");
-			
+			addMovieNodesAroundActor(moviesToAddToVis);			
 		}
 
 		this.setupNodeInteraction();
@@ -467,11 +458,14 @@ function makeArc(sAng,fAng,id,title){
     .text(title);
 }
 
+this.moviesLeftToCalculateBilling = 0;
 function addMovieNodesAroundActor(movies){
 	var movieNames = Object.keys(movies);
 	var m = Object.keys(movies).length;
 	var ang = 360 / m;
 	var i = 0;
+	viz.moviesLeftToCalculateBilling = m; //for eventually removing all non-top 3 billed movies asynchronously once processing is complete
+	console.log("   ||| There are "+m+"movies");
 	for(var movieName in movies){
 		var a = i * ang;
 		a = toRadians(a);
@@ -495,9 +489,10 @@ function addMovieNodesAroundActor(movies){
 		  .attr("cx",x)
 		  .attr("cy",y)
 		  .attr("r", r)
+		  .attr("stroke-dasharray","2,2")
 		  .on("mouseover",function(){
 				$("#status").text($(this).attr("valz")+" ("+$(this).attr("movieid")+")");
-				console.log(movieName);
+				//console.log(movieName);
 		   })
 		   .on("mouseout",function(){
 		   	$("#status").text("");
@@ -508,9 +503,6 @@ function addMovieNodesAroundActor(movies){
 		   })
 		   ;
 			Movie.fetchActors($("#actorsMovieCircle"+i).attr("movieid"),$("#actorsMovieCircle"+i).attr("id"));
-		//var movieName = movieNames[i];
-		//console.log("Drawing circle at "+x+","+y+": "+movieName+" "+movies[movieName].id);
-		
 		i++;
 	}
 		
@@ -520,6 +512,7 @@ function addMovieNodesAroundActor(movies){
 }
 var opacityTest = 1.0;
 var increasing = false;
+Movie.getMoviesInThreatres();
 
 function addActorNodes(names){
   //names should be like ["John Smith","Joe Biden","Mary Allen"]

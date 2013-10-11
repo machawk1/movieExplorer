@@ -27,6 +27,11 @@ for(var actorName in actors){
 	actors[actorName].fetchMovies();
 }
 
+
+/* **************** 
+	SOME ENTITY PROTOTYPING THAT IS DEPENDENT ON DATA BEING PRESENT 
+****************  */
+
 Actor.setMovies = function(actorName,movieLines){
 
 	if(actors[actorName]){
@@ -53,9 +58,48 @@ Movie.fetchActors = function(movieid,domid){
 		url:"http://matkelly.com/projects/ieeevis/?movieid=" + movieid
 	}).done(function(resp){
 		var lines = resp.split("\r\n");
+		--viz.moviesLeftToCalculateBilling;
+		console.log(viz.moviesLeftToCalculateBilling);
+		
+		
 		for(var ll=0; ll<3; ll++){
 			var symbol = "!=";
 			if(lines[ll]==$("#centralNodeTitle").text()){
+				$("#"+domid).removeAttr("stroke-dasharray");			
+				$("#"+domid).attr("stroke","green");
+
+				break;
+			}else if(ll==2){
+				$("#"+domid).attr("stroke","red");
+				console.log("AAAAAADDING notFirst3Billed to #"+domid);
+				$("#"+domid).attr("class",$("#"+domid).attr("class")+" notFirst3Billed");
+			}
+		}
+		
+		
+		if(viz.moviesLeftToCalculateBilling == 0){
+			console.log("DONE & DONE");
+			$(".notFirst3Billed").fadeOut(1000)
+		}
+		
+	}).fail(function(status,error,x){
+		console.log("ERROR1234");
+	});
+};
+
+Movie.getMoviesInThreatres = function(){
+	$.ajax({
+		url:"http://matkelly.com/projects/ieeevis/?intheatres=true"
+	}).done(function(resp){
+		console.log("NEW MOVIES!");
+		console.log(resp);
+		return;
+		var lines = resp.split("\r\n");
+		
+		for(var ll=0; ll<3; ll++){
+			var symbol = "!=";
+			if(lines[ll]==$("#centralNodeTitle").text()){
+				
 				$("#"+domid).attr("stroke","green");
 				return;
 			}
@@ -63,8 +107,8 @@ Movie.fetchActors = function(movieid,domid){
 		$("#"+domid).attr("stroke","red");
 	}).fail(function(status,error,x){
 		console.log("ERROR1234");
-	});
-};
+	});	
+}
 
 Actor.audit = function(){
 	var ok = 0;
@@ -78,6 +122,9 @@ Actor.audit = function(){
 }
 
 
+/* **************** 
+	END ENTITY PROTOTYPING
+	****************  */
 
 
 //3-29
