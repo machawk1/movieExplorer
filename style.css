@@ -63,7 +63,9 @@ circle:hover,.labels:hover {cursor: pointer;}
 
 #leftSwath:hover, #centerSwath:hover, #rightSwath:hover {fill: blue;}
 
-#status {position:absolute; bottom: 0; width: 100%; text-align: center; font-size: 18px; font-family: Arial, sans-serif;}
+#status {position:absolute; bottom: 0; width: 100%;  font-size: 18px; font-family: Arial, sans-serif;}
+.bottomCenter {text-align: center;}
+.bottomLeft {text-align: left; color: blue;}
 
 .etal {font-style: italic;}
 .etalcircle {
@@ -71,3 +73,4 @@ circle:hover,.labels:hover {cursor: pointer;}
 	stroke: green;
 	fill: white;
 }
+

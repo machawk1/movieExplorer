@@ -47,6 +47,25 @@ Movie.createArrayOfMoviesFromList = function(movieLines){
 	return movies;
 }
 
+Movie.fetchActors = function(movieid,domid){
+	//try to get movies list for actor
+	$.ajax({
+		url:"http://matkelly.com/projects/ieeevis/?movieid=" + movieid
+	}).done(function(resp){
+		var lines = resp.split("\r\n");
+		for(var ll=0; ll<3; ll++){
+			var symbol = "!=";
+			if(lines[ll]==$("#centralNodeTitle").text()){
+				$("#"+domid).attr("stroke","green");
+				return;
+			}
+		}
+		$("#"+domid).attr("stroke","red");
+	}).fail(function(status,error,x){
+		console.log("ERROR1234");
+	});
+};
+
 Actor.audit = function(){
 	var ok = 0;
 	for(var actorName in actors){
@@ -57,6 +76,7 @@ Actor.audit = function(){
 	}
 	console.log("Actors audit: "+ok+"/"+Object.keys(actors).length+" ok");
 }
+
 
 
 

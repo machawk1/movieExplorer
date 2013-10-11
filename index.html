@@ -7,6 +7,7 @@
 <script src="d3.v3.min.js"></script>
 <script src="jquery-2.0.3.min.js"></script>
 <script src="jquery-migrate-1.2.1.js"></script>
+<script src="jquery.pulses.min.js"></script>
 <script src="entities.js"></script>
 <script src="data.js"></script>
 <script>
@@ -69,7 +70,7 @@ function Visualization(){
 		console.log("What is centralNode now?: " + this.centralNode.type);
 		
 		if(this.centralNode.type == "Movie"){
-			console.log(this.centralNode);
+			//console.log(this.centralNode);
 			//movie-specific, TODO: change this to any sort of central entity specific
 			addActorNodes(
 				[
@@ -208,7 +209,7 @@ function switchContext(newContextEntity){
 	var selectedActorsName = $(newContextEntity[0]).attr("alt");
 	
 	var newCentralNode;
-	console.log(viz.centralNode);
+	//console.log(viz.centralNode);
 	//find index of actor in movie's list of actors
 	for(var actorI = 0; actorI < viz.centralNode.actors.length; actorI++){
 		if(viz.centralNode.actors[actorI] == selectedActorsName){
@@ -384,6 +385,7 @@ viz.node.enter().insert("circle", ".cursor")
 		.attr("dx", viz.width/2-90)
 		.attr("dy", viz.node.attr("cy")-80)
 		.text(viz.centralNode.title)
+		.attr("id","centralNodeTitle")
 		.style("font","36px Arial");
 	text.append("text")
 		.attr("dx", viz.node.attr("cx")-120)
@@ -417,7 +419,12 @@ viz.node.enter().insert("circle", ".cursor")
 		makeArc(-Math.PI/2,Math.PI/2,"actorLine","Actor Prominence");	  
 		makeArc(Math.PI/2,Math.PI,"directorLine","Director Prominence");	 
 		makeArc(Math.PI,Math.PI*3/2,"writerLine","Writer Prominence");
+		$("#status").removeClass("bottomLeft");
+		$("#status").addClass("bottomCenter");
 	}else if(viz.centralNode.type == "Actor"){
+		$("#status").addClass("bottomLeft"); //have movie at bottom left so as to not conflict with large # of nodes
+		$("#status").removeClass("bottomCenter");
+		
 		makeArc(-Math.PI,Math.PI,"actorLine","Movies");	 
 		 
 		 // This should probably be moved to where the rest of the logic is to 
@@ -472,36 +479,47 @@ function addMovieNodesAroundActor(movies){
 		var y = Math.round(-300*Math.sin(a) + 500);
 		var x = Math.round(-500*Math.cos(a) + 600);
 		console.log("("+x+","+y+")");
-				
+		
 		var r = 10;
 		console.log("movieNameI = "+movieName);
 		console.log("movies[movieNameI] = "+movies[movieName]);
+		console.log(movies[movieName]);
 		var c = viz.svg.insert("circle")
-		  .attr("stroke","blue")
+		  .attr("stroke","#cccccc")
 		  .attr("stroke-width","2")
-		  .attr("id","actorCircleX"+i)
+		  .attr("id","actorsMovieCircle"+i)
+		  .attr("class","movieCirclesInActorContext")
 		  .attr("fill","white")
-		  .attr("val",movieName)
+		  .attr("valz",movieName)
+		  .attr("movieid",movies[movieName].id)
 		  .attr("cx",x)
 		  .attr("cy",y)
 		  .attr("r", r)
 		  .on("mouseover",function(){
-				$("#status").text($(this).attr("val"));
+				$("#status").text($(this).attr("valz")+" ("+$(this).attr("movieid")+")");
 				console.log(movieName);
 		   })
 		   .on("mouseout",function(){
 		   	$("#status").text("");
-		   });
+		   })
+		   .on("click",function(){
+
+		   	  	
+		   })
 		   ;
+			Movie.fetchActors($("#actorsMovieCircle"+i).attr("movieid"),$("#actorsMovieCircle"+i).attr("id"));
 		//var movieName = movieNames[i];
 		//console.log("Drawing circle at "+x+","+y+": "+movieName+" "+movies[movieName].id);
 		
 		i++;
 	}
+		
 	function toDegrees (angle) {return angle * (180 / Math.PI);}
 	function toRadians (angle) {return angle * (Math.PI / 180);}
   
 }
+var opacityTest = 1.0;
+var increasing = false;
 
 function addActorNodes(names){
   //names should be like ["John Smith","Joe Biden","Mary Allen"]
