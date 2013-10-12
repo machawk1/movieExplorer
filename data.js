@@ -67,19 +67,25 @@ Movie.fetchActors = function(movieid,domid){
 			if(lines[ll]==$("#centralNodeTitle").text()){
 				$("#"+domid).removeAttr("stroke-dasharray");			
 				$("#"+domid).attr("stroke","green");
+				$("#"+domid).attr("billing",ll+1);
+				$("#"+domid).attr("class",$("#"+domid).attr("class")+" first3Billed");
 
 				break;
 			}else if(ll==2){
 				$("#"+domid).attr("stroke","red");
-				console.log("AAAAAADDING notFirst3Billed to #"+domid);
 				$("#"+domid).attr("class",$("#"+domid).attr("class")+" notFirst3Billed");
 			}
 		}
 		
 		
 		if(viz.moviesLeftToCalculateBilling == 0){
-			console.log("DONE & DONE");
-			$(".notFirst3Billed").fadeOut(1000)
+			$(".notFirst3Billed").fadeOut(1000,function(){
+				$(this).remove();});
+			$(".first3Billed").each(function(){
+				$(this).attr("r",$(this).attr("r") * (4 - $(this).attr("billing")));
+				
+			});
+			addMovieNodesAroundActor($(".first3Billed"));
 		}
 		
 	}).fail(function(status,error,x){
@@ -100,7 +106,7 @@ Movie.getMoviesInThreatres = function(){
 			var symbol = "!=";
 			if(lines[ll]==$("#centralNodeTitle").text()){
 				
-				$("#"+domid).attr("stroke","green");
+				//$("#"+domid).attr("stroke","green");
 				return;
 			}
 		}

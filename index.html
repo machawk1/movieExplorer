@@ -484,22 +484,38 @@ function addMovieNodesAroundActor(movies){
 		  .attr("id","actorsMovieCircle"+i)
 		  .attr("class","movieCirclesInActorContext")
 		  .attr("fill","white")
-		  .attr("valz",movieName)
+		  .attr("moviename",movieName)
 		  .attr("movieid",movies[movieName].id)
 		  .attr("cx",x)
 		  .attr("cy",y)
 		  .attr("r", r)
 		  .attr("stroke-dasharray","2,2")
 		  .on("mouseover",function(){
-				$("#status").text($(this).attr("valz")+" ("+$(this).attr("movieid")+")");
+				$("#status").text($(this).attr("moviename")+" ("+$(this).attr("movieid")+")");
 				//console.log(movieName);
 		   })
 		   .on("mouseout",function(){
 		   	$("#status").text("");
 		   })
 		   .on("click",function(){
-
-		   	  	
+				console.log($(this)[0]);
+		   	  	console.log("Load movie with id "+$($(this)[0]).attr("movieid"));
+		   	  	console.log("Load movie with id "+$($(this)[0]).attr("moviename"));
+		   	  	if(!allMovies[$($(this)[0]).attr("moviename")]){ //movie was not previously fetched
+		   	  		//load movie data
+		   	  		console.log("Pull movie from IMDB");
+		   	  	} else {
+		   	  		console.log("Found movie in array");
+		   	  		console.log(allMovies[$($(this)[0]).attr("moviename")]);
+		   	  		d3.select("#viz").remove();
+		   	  		
+					viz = new Visualization();
+					
+					viz.addMovie(allMovies[$($(this)[0]).attr("moviename")]);
+					viz.centralNode.title = $($(this)[0]).attr("moviename");
+					viz.draw();
+		   	  		
+		   	  	}
 		   })
 		   ;
 			Movie.fetchActors($("#actorsMovieCircle"+i).attr("movieid"),$("#actorsMovieCircle"+i).attr("id"));
