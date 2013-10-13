@@ -13,13 +13,13 @@
 
 function Visualization(){
 	this.actorsloaded = 0;
-	this.allLoaded = false; //when we go from movie->actor->movie, we shouldn't have to reload data
+	//this.allLoaded = false; //when we go from movie->actor->movie, we shouldn't have to reload data
 	
 	this.updatePercentage = function(){
 		this.actorsloaded = ++(this.actorsloaded);
 		var percentLoaded = parseInt(this.actorsloaded/numberOfActors * 100,10)
 		$("#percentLoaded").text("Data "+percentLoaded+"% Loaded");
-		if(percentLoaded == 100){this.allLoaded = true;}
+		if(percentLoaded == 100){allLoaded = true;}
 	}
 	this.addMovie = function(movieIn){
 		console.log(movieIn);
@@ -124,7 +124,9 @@ function Visualization(){
 			  $("#writerEtAl text").text("et al.");
 		  })
 		  .on("click",function(){
-		  	if($("#percentLoaded").text().indexOf("100% Loaded") == -1 || !viz.allLoaded){
+		  	if(allLoaded){
+		  		switchContext($(this));}
+		  	else if($("#percentLoaded").text().indexOf("100% Loaded") == -1){
 		  		//TODO: highlight percentloaded in red
 		  		$("#percentLoaded").css("font-size","48px");
 				$("#percentLoaded").animate({
@@ -132,10 +134,8 @@ function Visualization(){
 				  }, 250, function() {
 					// Animation complete.
 				  });
-		  		
-		  		return;
+		  		}
 		  	}
-		  	switchContext($(this));}
 		  );
 		d3.selectAll("circle.node[context='actor']")
 		 .on("mouseover",function(){
@@ -259,6 +259,7 @@ function addMovieSelector(){
 						viz = new Visualization();
 						viz.addMovie(targetMovieObj);
 						viz.actorsloaded = numberOfActors;
+						allLoaded = true;
 						viz.draw();
 					}
 				)
@@ -756,7 +757,7 @@ function addWriters(writers){
 	
 	
 	for(var w=1; w<Math.min(4,viz.centralNode.writers.length); w++){
-		viz.svg.append("circle").attr("class","etalcircle").attr("r",15)	
+		viz.svg.append("circle").attr("class","etalcircle").attr("r",15).attr("context","movie")
 			.attr("cx",viz.centralNode.mCircleX).attr("cy",viz.centralNode.mCircleY)
 			.attr("title",viz.centralNode.writers[w].name)
 			.transition().delay(1000)
@@ -815,6 +816,7 @@ function addDirector(director){
 
 } //end visualization class
 
+var allLoaded = false;
 
 
 var viz = new Visualization();	 
