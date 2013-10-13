@@ -68,8 +68,9 @@ Movie.fetchActors = function(movieid,domid){
 		for(var ll=0; ll<3; ll++){
 			var symbol = "!=";
 			if(lines[ll]==$("#centralNodeTitle").text()){
-				$("#"+domid).removeAttr("stroke-dasharray");			
-				$("#"+domid).attr("stroke","green");
+				$("#"+domid).removeAttr("stroke-dasharray");
+				d3.select("#"+domid).transition().duration(500).ease("linear").attr("stroke","green");		
+				//$("#"+domid).attr("stroke","green");
 				$("#"+domid).attr("billing",ll+1);
 				$("#"+domid).attr("class",$("#"+domid).attr("class")+" first3Billed");
 
@@ -90,10 +91,32 @@ Movie.fetchActors = function(movieid,domid){
 		
 			d3.select(this).transition()
 	  		   .duration(2000)
-	  		   .ease("elastic").attr("r",$(this).attr("r") * (4 - $(this).attr("billing")));
-				
+	  		   .ease("elastic").attr("r",$(this).attr("r") * (4 - $(this).attr("billing")));		
 			});
-			addMovieNodesAroundActor($(".first3Billed"));
+			
+			
+			console.log("lenlen = "+$(".movieCirclesInActorContext").length);
+			var ang = 360 / $(".movieCirclesInActorContext").length;
+			function toRadians (angle) {return angle * (Math.PI / 180);}
+			
+			return;
+			
+			for(var mm=0; mm<$(".movieCirclesInActorContext").length;mm++){
+				var a = mm * ang;
+				a = toRadians(a);
+				
+				
+			
+				var y = Math.round(-300*Math.sin(a) + 500);
+				var x = Math.round(-500*Math.cos(a) + 600);
+				d3.select($(".movieCirclesInActorContext")[mm]).transition().duration(500).ease("linear").attr("cy",y);
+				d3.select($(".movieCirclesInActorContext")[mm]).transition().duration(500).ease("linear").attr("cx",x);
+				console.log("Moving to "+x+"  "+y);
+				console.log($(".movieCirclesInActorContext")[mm]);
+				
+			}
+			
+			//addMovieNodesAroundActor($(".first3Billed"));
 		}
 		
 	}).fail(function(status,error,x){

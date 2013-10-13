@@ -75,3 +75,4 @@ circle:hover,.labels:hover {cursor: pointer;}
 	fill: white;
 }
 
+#statusUpdate {position: absolute; left: 5px; top: 5px; color: #333; font: 128px arial; margin: 0; padding: 0; text-align: center; width: 100%;}

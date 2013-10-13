@@ -22,8 +22,10 @@ function Visualization(){
 		if(percentLoaded == 100){this.allLoaded = true;}
 	}
 	this.addMovie = function(movieIn){
-		if(allMovies['Oblivion'].type == 'string'){this.centralNode = allMovies[movieIn];}
-		else if(allMovies['Oblivion'].type == 'Movie'){this.centralNode = movieIn;}
+		console.log(movieIn);
+		console.log("Look above");
+		if(movieIn.type == 'string'){this.centralNode = allMovies[movieIn];}
+		else if(movieIn.type == 'Movie'){this.centralNode = movieIn;}
 		
 		//this.centralNode = movieIn;
 	}
@@ -64,7 +66,6 @@ function Visualization(){
 		
 		viz.node = node.data(this.nodes);
 		this.setupCentralNode()
-		console.log("XPP");
 		console.log(actors);
 		
 		console.log("What is centralNode now?: " + this.centralNode.type);
@@ -229,6 +230,8 @@ function switchContext(newContextEntity){
 	reduceCenterCircleRadius();
 }
 
+
+
 function addMovieSelector(){
 	 function addMovieCircles(movies,animateFrom){
 		  for(var m=0; m<movies.length; m++){
@@ -256,12 +259,7 @@ function addMovieSelector(){
 						viz = new Visualization();
 						viz.addMovie(targetMovieObj);
 						viz.actorsloaded = numberOfActors;
-						viz.allLoaded = true;
 						viz.draw();
-						viz.allLoaded = true;
-						$("#percentLoaded").html("100% Loaded");
-						$("#percentLoaded").text("100% Loaded");
-						console.log("LOADED!");
 					}
 				)
 			  .on("mouseover",function(t){d3.select(this).attr("fill","yellow");})
@@ -473,6 +471,9 @@ function addMovieNodesAroundActor(movies){
 	var i = 0;
 	viz.moviesLeftToCalculateBilling = m; //for eventually removing all non-top 3 billed movies asynchronously once processing is complete
 	console.log("   ||| There are "+m+"movies");
+	//$("body").append("<p id='statusUpdate'>test</p>");
+	
+	
 	for(var movieName in movies){
 		var a = i * ang;
 		a = toRadians(a);
@@ -508,9 +509,40 @@ function addMovieNodesAroundActor(movies){
 				console.log($(this)[0]);
 		   	  	console.log("Load movie with id "+$($(this)[0]).attr("movieid"));
 		   	  	console.log("Load movie with id "+$($(this)[0]).attr("moviename"));
+		   	  	var mn = $($(this)[0]).attr("moviename");
 		   	  	if(!allMovies[$($(this)[0]).attr("moviename")]){ //movie was not previously fetched
 		   	  		//load movie data
 		   	  		console.log("Pull movie from IMDB");
+		   	  		$.ajax({
+						url:"http://matkelly.com/projects/ieeevis/?movieid=" + $($(this)[0]).attr("movieid")
+					}).done(function(resp){
+						var actorsFromIMDB = resp.split("\r\n");
+						//create new actors if necessary
+						if(!actors[actorsFromIMDB[0]]){actors[actorsFromIMDB[0]] = new Actor(actorsFromIMDB[0],20);}
+						if(!actors[actorsFromIMDB[1]]){actors[actorsFromIMDB[1]] = new Actor(actorsFromIMDB[1],20);}
+						if(!actors[actorsFromIMDB[2]]){actors[actorsFromIMDB[2]] = new Actor(actorsFromIMDB[2],20);}
+						
+						var actorsInMovie = [actors[actorsFromIMDB[0]],actors[actorsFromIMDB[1]],actors[actorsFromIMDB[2]]];
+						
+						allMovies[mn] =
+							new Movie(
+							mn,
+							actorsInMovie,
+							[new Writer("XXX"),new Writer("XXX")],
+							[new Director("YYY")]
+						);	
+						
+						targetMovieObj = allMovies[mn] 
+							
+						d3.select("#viz").remove();
+						viz = new Visualization();
+						viz.addMovie(targetMovieObj);
+						viz.centralNode.actors = [actorsFromIMDB[0],actorsFromIMDB[1],actorsFromIMDB[2]]; //just the names, not the actor objs
+						viz.actorsloaded = numberOfActors;
+						viz.draw();
+						
+					
+					});
 		   	  	} else {
 		   	  		console.log("Found movie in array");
 		   	  		console.log(allMovies[$($(this)[0]).attr("moviename")]);
@@ -528,11 +560,10 @@ function addMovieNodesAroundActor(movies){
 			Movie.fetchActors($("#actorsMovieCircle"+i).attr("movieid"),$("#actorsMovieCircle"+i).attr("id"));
 		i++;
 	}
-		
-	function toDegrees (angle) {return angle * (180 / Math.PI);}
-	function toRadians (angle) {return angle * (Math.PI / 180);}
-  
 }
+function toDegrees (angle) {return angle * (180 / Math.PI);}
+function toRadians (angle) {return angle * (Math.PI / 180);}
+
 var opacityTest = 1.0;
 var increasing = false;
 Movie.getMoviesInThreatres();
@@ -540,6 +571,9 @@ Movie.getMoviesInThreatres();
 function addActorNodes(names){
   //names should be like ["John Smith","Joe Biden","Mary Allen"]
   //prominences should be like relative to each other, [4,2,1] means 0 is double 1, which is double 2
+  
+  console.log("Names:");
+  console.log(names);
   
   var prominences = [];
   for(var i in names){
