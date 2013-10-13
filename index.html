@@ -13,9 +13,13 @@
 
 function Visualization(){
 	this.actorsloaded = 0;
+	this.allLoaded = false; //when we go from movie->actor->movie, we shouldn't have to reload data
+	
 	this.updatePercentage = function(){
 		this.actorsloaded = ++(this.actorsloaded);
-		$("#percentLoaded").text("Data "+parseInt(this.actorsloaded/numberOfActors * 100,10)+"% Loaded");
+		var percentLoaded = parseInt(this.actorsloaded/numberOfActors * 100,10)
+		$("#percentLoaded").text("Data "+percentLoaded+"% Loaded");
+		if(percentLoaded == 100){this.allLoaded = true;}
 	}
 	this.addMovie = function(movieIn){
 		if(allMovies['Oblivion'].type == 'string'){this.centralNode = allMovies[movieIn];}
@@ -119,7 +123,7 @@ function Visualization(){
 			  $("#writerEtAl text").text("et al.");
 		  })
 		  .on("click",function(){
-		  	if($("#percentLoaded").text().indexOf("100% Loaded") == -1){
+		  	if($("#percentLoaded").text().indexOf("100% Loaded") == -1 || !viz.allLoaded){
 		  		//TODO: highlight percentloaded in red
 		  		$("#percentLoaded").css("font-size","48px");
 				$("#percentLoaded").animate({
@@ -236,7 +240,7 @@ function addMovieSelector(){
 			   .attr("fill","white")
 			   .attr("title",movies[m].title)
 			   .attr("class","movieInSelector")
-			   .attr("context","movie")
+			   .attr("context","movie")		   
 			   .attr("cx",movieSelectorCircleCoords[0])
 			   .attr("cy",movieSelectorCircleCoords[1])
 			   .on("click",function()
@@ -251,8 +255,13 @@ function addMovieSelector(){
 						d3.select("#viz").remove();
 						viz = new Visualization();
 						viz.addMovie(targetMovieObj);
+						viz.actorsloaded = numberOfActors;
+						viz.allLoaded = true;
 						viz.draw();
+						viz.allLoaded = true;
 						$("#percentLoaded").html("100% Loaded");
+						$("#percentLoaded").text("100% Loaded");
+						console.log("LOADED!");
 					}
 				)
 			  .on("mouseover",function(t){d3.select(this).attr("fill","yellow");})
@@ -772,6 +781,8 @@ function addDirector(director){
 }
 
 } //end visualization class
+
+
 
 var viz = new Visualization();	 
 viz.addMovie(allMovies['Oblivion']); //oblivion is defined in the data.js file

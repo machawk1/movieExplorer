@@ -22,11 +22,14 @@ actors["Gwyneth Paltrow"] = new Actor("Gwyneth Paltrow",35);
 actors["Don Cheadle"] = new Actor("Don Cheadle",14);
 
 var numberOfActors = Object.keys(actors).length;
-for(var actorName in actors){
-	console.log("Fetching movies for "+actorName);
-	actors[actorName].fetchMovies();
-}
 
+function fetchMoviesForActors(){
+	for(var actorName in actors){
+		console.log("Fetching movies for "+actorName);
+		actors[actorName].fetchMovies();
+	}
+}
+fetchMoviesForActors();
 
 /* **************** 
 	SOME ENTITY PROTOTYPING THAT IS DEPENDENT ON DATA BEING PRESENT 
@@ -74,15 +77,20 @@ Movie.fetchActors = function(movieid,domid){
 			}else if(ll==2){
 				$("#"+domid).attr("stroke","red");
 				$("#"+domid).attr("class",$("#"+domid).attr("class")+" notFirst3Billed");
+				d3.select("#"+domid).transition().duration(500).ease("linear").attr("r","0");
 			}
 		}
 		
 		
 		if(viz.moviesLeftToCalculateBilling == 0){
-			$(".notFirst3Billed").fadeOut(1000,function(){
-				$(this).remove();});
+			$(".notFirst3Billed").remove();
+			//$(".notFirst3Billed").fadeOut(1000,function(){
+			//	$(this).remove();});
 			$(".first3Billed").each(function(){
-				$(this).attr("r",$(this).attr("r") * (4 - $(this).attr("billing")));
+		
+			d3.select(this).transition()
+	  		   .duration(2000)
+	  		   .ease("elastic").attr("r",$(this).attr("r") * (4 - $(this).attr("billing")));
 				
 			});
 			addMovieNodesAroundActor($(".first3Billed"));
