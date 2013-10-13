@@ -15,10 +15,7 @@ function Visualization(){
 	this.actorsloaded = 0;
 	this.updatePercentage = function(){
 		this.actorsloaded = ++(this.actorsloaded);
-		//console.log((this.actorsloaded) +"/"+numberOfActors);
 		$("#percentLoaded").text("Data "+parseInt(this.actorsloaded/numberOfActors * 100,10)+"% Loaded");
-		//$("path,text").css("opacity",this.actorsloaded/numberOfActors);
-		//$("rect").attr("fill","red"); //doesn't work
 	}
 	this.addMovie = function(movieIn){
 		if(allMovies['Oblivion'].type == 'string'){this.centralNode = allMovies[movieIn];}
@@ -255,6 +252,7 @@ function addMovieSelector(){
 						viz = new Visualization();
 						viz.addMovie(targetMovieObj);
 						viz.draw();
+						$("#percentLoaded").html("100% Loaded");
 					}
 				)
 			  .on("mouseover",function(t){d3.select(this).attr("fill","yellow");})
@@ -702,7 +700,7 @@ function addWriters(writers){
 	
 	
 	var text = viz.svg.append("g")
-		.attr("class", "actorLabel label")
+		.attr("class", "label")
 		.append("text")
 		.attr("dx",viz.centralNode.mCircleX)
 		.attr("dy",viz.centralNode.mCircleY)

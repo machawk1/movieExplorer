@@ -33,6 +33,7 @@ rect.error {
 #directorLine {fill: red;}
 #writerLine {fill: green;}
 .actorLabel {font:normal normal 12px Arial;}
+.label {font:normal normal 12px Arial;}
 
 .cursor {
   fill: none;
