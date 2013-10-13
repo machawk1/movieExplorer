@@ -294,6 +294,7 @@ function addMovieSelector(){
   .attr("r", "20")
   .attr("fill","white")
   .attr("id","movieSelectorCircle")
+  .attr("context","movie")
   .attr("class","movieSelectorCircle")
   .style("opacity","0.5")
   .on("mouseover",function(t){d3.select(this).style("opacity","1.0");})
@@ -587,7 +588,11 @@ function addActorNodes(names){
    if(prominences[p] > maxProminence){maxProminence = prominences[p];}
   }
   
-  pos = [[100,viz.centralNode.mCircleY-100],[viz.centralNode.mCircleX,Math.max(50*prominences[1]/maxProminence+5,viz.height-viz.centralNode.mCircleX-100)],[viz.width-100,viz.centralNode.mCircleY-100]];
+  pos = [
+  	[100,viz.centralNode.mCircleY-100],
+  	[viz.centralNode.mCircleX,Math.max(50*prominences[1]/maxProminence+5,viz.height-viz.centralNode.mCircleX-100)],
+  	[viz.width-100,viz.centralNode.mCircleY-100]
+  ];
   
   var r = [50*prominences[0]/maxProminence,50*prominences[1]/maxProminence,50*prominences[2]/maxProminence];
   
@@ -627,13 +632,7 @@ function addActorNodes(names){
 	var actorsMoviesN = Object.keys(actorObj.movies).length;
 	$(this).attr("movieCount",actorsMoviesN);
 	console.log(actorObj.name+" has "+actorsMoviesN + " movies");
-	$("#status").html("Click this swath to get more info on "+d3.select(this).attr("title")+"'s other "+$(this).attr('movieCount')+" movies");
-	/*$.ajax({
-		url:"actors.json"
-	}).done(function(resp){
-		JSON.parse(resp);
-	});*/
-	
+	$("#status").html("Click this swath to get more info on "+d3.select(this).attr("title")+"'s other "+$(this).attr('movieCount')+" movies");	
   })
   .on("mouseout",function(){
 	$("#status").html("");
