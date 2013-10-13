@@ -410,7 +410,9 @@ viz.node.enter().insert("circle", ".cursor")
 		.attr("context","movie")
 		.text("Data 0% Loaded")
 		.attr("id","percentLoaded")
-		.style("font","10px Arial");
+		.style("font","10px Arial")
+		.style("display",allLoaded ? "none" : "block")
+		;
 	
     console.log("We know your type: "+viz.centralNode.type);
   	if(viz.centralNode.type == "Movie"){
